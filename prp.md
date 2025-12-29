@@ -1,0 +1,401 @@
+# PRP: membran.app
+
+---
+
+## 1) Executive Summary
+
+- **Nama app**: membran.app
+- **Target audience**:
+  - Primary: Discord server owners who monetize their communities (5,000+ servers globally)
+  - Secondary: Discord members purchasing premium access
+- **Core promise**: Automated Discord subscription & role management SaaS that eliminates manual payment verification and role assignment
+
+---
+
+## 2) Problem & Why Now
+
+**Masalah utama:**
+- Server owners spend 10-30 hours/month manually verifying payments and assigning roles
+- Members wait 24-48 hours for role assignment after payment (poor UX)
+- No automated expiry tracking → revenue leakage from forgotten cancellations
+- Manual reminder systems are error-prone and inconsistent
+
+**Solusi existing kurang karena:**
+- Patreon/Ko-fi: No Discord role automation, requires manual syncing
+- Discord native subscriptions: Server-specific, not customizable, limited pricing tiers
+- Generic bots: Lack payment integration (Midtrans), member portal, and analytics
+
+**Diferensiasi app ini:**
+- BYOK (Bring Your Own Key) model - server owners use their own Midtrans account
+- Zero per-transaction fees membran side (unlike Patreon's 5-12%)
+- Flat pricing: $10/month for 500 members (most servers break even at 10 paying members)
+- Southeast Asia focused (Midtrans integration = local payment methods: GoPay, OVO, Dana, etc.)
+
+---
+
+## 3) User Journeys (3 Skenario)
+
+### Journey A: Server Owner Setup (New User)
+1. Server owner lands on membran.app → clicks "Start Free Trial"
+2. Signs up with email + password → redirected to onboarding wizard
+3. Step 1: Invite Discord bot to server → bot joins with permissions
+4. Step 2: Configure pricing tiers (e.g., Basic $5, Premium $15, VIP $30) → select roles for each tier
+5. Step 3: Enter Midtrans API keys (Server Key & Client Key) → test connection
+6. Step 4: Review settings → click "Publish" → receives unique pricing page URL
+7. Shares URL in Discord server → ready to accept payments
+
+### Journey B: Member Subscription Purchase
+1. Member clicks pricing page link (e.g., membran.app/server/xyz)
+2. Lands on branded pricing page → selects tier (e.g., Premium $15/month)
+3. Clicks "Subscribe" → prompted to "Connect with Discord"
+4. Authorizes membran.app bot → redirected to Midtrans payment page
+5. Completes payment (GoPay/OVO/Card) → Midtrans sends webhook
+6. Bot instantly assigns "Premium" role → member receives DM: "Welcome! Your Premium access is active until [date]"
+7. Member can access membran.app/member portal → view subscription status, expiry, renewal options
+
+### Journey C: Server Owner Daily Operations
+1. Server owner logs into membran.app dashboard
+2. Sees overview: 47 active subscribers, $705 MRR, 3 expiring in 7 days
+3. Clicks "Analytics" tab → views churn rate (4.2%), revenue trend
+4. Clicks "Members" tab → sees list with status (Active, Grace Period, Expired)
+5. One member in grace period (day 3 of 5) → system already auto-sent DM reminder
+6. Member renews → webhook triggers → role restored automatically
+7. Server owner exports monthly report (CSV) for accounting
+
+---
+
+## 4) Core Objects / Data Model
+
+```
+Entity List:
+├── ServerOwner
+│   ├── email, password_hash, created_at
+│   ├── subscription_plan (Free, Base, Unlimited)
+│   └── servers (one-to-many)
+|   |__ discord_user_id
+│
+├── DiscordServer
+│   ├── discord_id, name, invite_bot_status
+│   ├── midtrans_server_key, midtrans_client_key (encrypted)
+│   ├── pricing_tiers (one-to-many)
+│   └── subscriptions (one-to-many)
+│
+├── PricingTier
+│   ├── name, price, currency, duration (monthly/yearly)
+│   ├── discord_role_id
+│   └── features (JSON)
+│
+├── Member
+│   ├── discord_user_id, username, discriminator
+│   ├── server (many-to-one)
+│   └── subscriptions (one-to-many)
+│
+├── Subscription
+│   ├── member (many-to-one)
+│   ├── pricing_tier (many-to-one)
+│   ├── status (Active, GracePeriod, Expired, Cancelled)
+│   ├── start_date, expiry_date
+│   ├── grace_period_until
+│   ├── last_payment_amount, last_payment_date
+│   ├── midtrans_transaction_id
+│   └── reminder_sent (boolean: 7d, 3d, 1d)
+│
+└── ActivityLog
+    ├── subscription (many-to-one)
+    ├── action (role_assigned, role_removed, payment_received, reminder_sent)
+    └── timestamp
+```
+
+---
+
+## 5) Features by Level
+
+### Level 1 (MVP) - Time-to-Value: 2 weeks
+- Server owner registration + authentication
+- Discord bot invitation + server connection
+- Pricing tier configuration (1-5 tiers)
+- Midtrans API key integration + webhook handler
+- Member checkout flow + Discord OAuth
+- Instant role assignment after payment
+- Basic dashboard (active subscribers count, revenue)
+- Manual role assignment/removal by server owner
+
+### Level 2 - Power Features: 4 weeks
+- **Expiry Management**: Cron job to check expiring subscriptions
+- **Grace Period System**: 5-day grace period before role removal
+- **DM Reminders**: Automated at 7 days, 3 days, 1 day before expiry
+- **Member Portal**: Subscription status, expiry date, renewal button
+- **Analytics Dashboard**: MRR, churn rate, subscriber trends
+- **Activity Logs**: Payment records, role assignment/removal history
+- **Multi-Tier Support**: Different roles for different price points
+- **Server Owner Limits**: 500 members for $10/month plan
+
+### Level 3 (Future) - Scale & Polish: 8 weeks
+- **Unlimited Tier**: $29/month for unlimited members
+- **Coupon/Discount System**: Promo codes for limited-time offers
+- **Free Trial Management**: 7-day free trial for new subscribers
+- **Webhook Events**: Custom webhook notifications to server owner's URL
+- **Refund Handling**: Auto-remove role on Midtrans refund webhook
+- **Data Export**: CSV/JSON export for subscribers and transactions
+- **GDPR Compliance**: Data deletion requests, consent management
+- **Affiliate System**: Server owners can refer others → commission
+- **Mobile App**: React Native app for server owners (push notifications)
+- **AI Insights**: Churn prediction, optimal pricing recommendations
+
+---
+
+## 6) Tech Stack (Final)
+
+### Monorepo Architecture (Bun-based)
+
+**Runtime & Build:**
+- **Bun** - Fast JavaScript runtime & package manager
+- **Turborepo** - Monorepo orchestration (build/cache/lint)
+
+**Frontend (`apps/web`):**
+- **React 18** + **Vite** - Fast dev server, optimized builds
+- **smoothui.dev** - Beautiful component library built on smoothui.dev
+  - Handpicked color palettes with excellent contrast
+  - Tailwind CSS-based with custom theming
+- **TanStack Router** - Type-safe routing
+- **TanStack Query** - Server state management
+- **Zod** - Runtime type validation + form schemas
+- **React Hook Form** - Form validation and submission
+- **Zustand** - State management for React
+
+**Backend (`apps/api`):**
+- **Hono** - Fast, lightweight web framework
+- **Hono Discord OAuth** - Discord authentication
+- **Midtrans SDK** - Payment gateway integration
+- **Discordeno** or **discord.js** - Discord bot library (Bun-compatible)
+- **Scalar** - API Documentation
+
+**Database (`packages/db`):**
+- **Cloudflare D1** - SQLite at edge (free tier generous)
+- **Drizzle ORM** - Type-safe SQL with great DX
+- **Drizzle Kit** - Migrations and schema management
+
+**Shared (`packages/shared`):**
+- **Zod schemas** - Shared validation between FE/BE
+- **API client** - Typed wrappers around Hono endpoints
+
+**Background Jobs:**
+- **Cloudflare Workers** - Scheduled tasks (cron triggers)
+- **Cloudflare Queues** - Background job processing
+
+**Hosting:**
+- **Cloudflare Pages** - Frontend deployment (free tier)
+- **Cloudflare Workers** - API + Discord bot worker
+- **Cloudflare D1** - Database hosting
+
+**Monitoring:**
+- **Sentry** - Error tracking
+- **Cloudflare Analytics** - Request metrics
+
+---
+
+## 7) Checkpoints & Definition of Done
+
+### MVP Development Order
+
+#### Step 1: Backend - Midtrans Integration
+- [ ] Hono API scaffolded with Bun
+- [ ] D1 database + Drizzle ORM configured
+- [ ] Midtrans SDK integrated (create transaction)
+- [ ] POST /api/payment/create endpoint
+- [ ] Midtrans webhook handler (signature verification)
+- [ ] Test payment flow end-to-end
+- [ ] Scalar API documentation generated
+
+#### Step 2: Backend - Discord Integration
+- [ ] Discord bot application created
+- [ ] Discordeno/discord.js integrated (Bun-compatible)
+- [ ] Bot invite flow + permissions setup
+- [ ] POST /api/discord/assign-role endpoint
+- [ ] POST /api/discord/remove-role endpoint
+- [ ] Test role assignment/removal
+
+#### Step 3: Frontend - Stitching
+- [ ] Vite + React app scaffolded
+- [ ] smoothui.dev components installed
+- [ ] TanStack Router configured
+- [ ] TanStack Query for API calls
+- [ ] Pricing page with tier selection
+- [ ] Payment checkout flow UI
+- [ ] Member portal (subscription status)
+- [ ] Connect BE endpoints to UI
+
+#### Step 4: Review & Polish
+- [ ] End-to-end testing (payment → role assignment)
+- [ ] Error handling edge cases
+- [ ] UI/UX refinement
+- [ ] Deploy to Cloudflare (Pages + Workers + D1)
+
+### Milestone 1: Core Infrastructure
+- [ ] Bun monorepo initialized (Turborepo)
+- [ ] `apps/web` (Vite + React) scaffolded
+- [ ] `apps/api` (Hono) scaffolded
+- [ ] `packages/db` (Drizzle + D1) configured
+- [ ] `packages/shared` (Zod schemas) created
+- [ ] GitHub repo + branch strategy (main + dev)
+
+### Milestone 2: Midtrans Payment Flow
+- [ ] Midtrans SDK installed and configured
+- [ ] D1 tables: payments, transactions
+- [ ] POST /payments/create - create Midtrans transaction
+- [ ] POST /webhooks/midtrans - handle payment notifications
+- [ ] Signature verification implemented
+- [ ] Test payment completed successfully
+
+### Milestone 3: Discord Bot Integration
+- [ ] Discord bot application created in Discord Developer Portal
+- [ ] Discord bot token stored in env vars
+- [ ] POST /discord/assign-role - assign role to user
+- [ ] POST /discord/remove-role - remove role from user
+- [ ] Rate limiting handled (Discord API limits)
+- [ ] Test role assignment/removal working
+
+### Milestone 4: MVP Release
+- [ ] Pricing page with smoothui.dev components
+- [ ] Checkout flow UI working
+- [ ] Member portal (status, expiry)
+- [ ] Production deployment (Cloudflare Pages + Workers)
+- [ ] Domain configured (membran.app)
+- [ ] Beta testing with 3 server owners
+
+### MVP Definition of Done (Week 6)
+A feature is "done" when:
+- [ ] Code is peer-reviewed (even if solo reviewer)
+- [ ] Unit tests cover critical paths (payment, role assignment)
+- [ ] Manual testing completed in staging
+- [ ] Error handling covers edge cases
+- [ ] Documentation updated (API docs, bot setup guide)
+
+### Security Basics
+- [ ] No hardcoded API keys (all in Cloudflare secrets/env vars)
+- [ ] Midtrans keys encrypted at rest (D1 doesn't support pgcrypto - use Cloudflare Secrets)
+- [ ] Rate limiting on API endpoints (Cloudflare Workers built-in)
+- [ ] HTTPS enforced everywhere (Cloudflare auto)
+- [ ] CSRF protection on forms (Hono middleware)
+- [ ] Input validation on all user inputs (Zod schemas)
+
+---
+
+## 8) Constraints & Non-goals
+
+### Constraints
+
+**Technical:**
+- Discord rate limits: 1 role update/sec per server (use queue for batch)
+- Midtrans webhook timeout: Must respond within 30 seconds
+- Cloudflare Workers CPU limit: 30ms free tier, 10s paid (for bot operations)
+- D1 database size: 500MB free tier, ~5GB for $0.15/MB-month
+- D1 read units: 5M/day free, write units: 100K/day free
+
+**Business:**
+- Monthly server cost: ~$0-20 (Cloudflare free tier generous)
+  - Workers: Free up to 100K requests/day
+  - D1: Free up to 500MB storage
+  - Pages: Free unlimited bandwidth
+- Break-even: 1-2 server owners on Base plan
+- Target: 100 server owners in 3 months ($1,000 MRR)
+
+**Legal:**
+- Must comply with Discord Terms of Service (no spam, clear bot disclosure)
+- Midtrans requires business entity for production (can use individual during testing)
+- GDPR required if storing EU user data (consent checkboxes + data export)
+
+### Non-goals (Will NOT Build in MVP)
+
+❌ **Mobile app** - Web-only for launch (PWA sufficient)
+❌ **Crypto payments** - Midtrans fiat only (crypto in Level 3)
+❌ **Multi-language support** - English only for MVP
+❌ **White-label branding** - No custom domains for server owners
+❌ **API for third-party integrations** - Closed system for now
+❌ **Community features** (forums, chat) - Focus on SaaS, not social
+❌ **Advanced AI features** - Level 3 only
+
+---
+
+## 9) Acceptance Tests (Contoh)
+
+### Test Case 1: New Server Owner Onboarding
+**Given**: A new Discord server owner with 1,000 members
+**When**: They complete the 4-step setup wizard
+**Then**:
+- Bot is successfully invited to their server
+- Midtrans test payment completes successfully
+- Pricing page is accessible at membran.app/server/{slug}
+- Test member can purchase subscription → role assigned within 5 seconds
+
+### Test Case 2: Subscription Expiry Flow
+**Given**: A member with subscription expiring in 7 days
+**When**: Cron job runs daily at 00:00 LocalTime
+**Then**:
+- Day 7: Member receives DM: "Your subscription expires in 7 days"
+- Day 3: Member receives DM: "Your subscription expires in 3 days"
+- Day 1: Member receives DM: "Your subscription expires tomorrow"
+- Day 0: Subscription enters "GracePeriod" status (5 days)
+- Day 5 (grace end): Role removed if no payment
+- Member portal shows correct status at each stage
+
+### Test Case 3: Payment Reversal (Refund)
+**Given**: A member with active Premium subscription
+**When**: Midtrans sends refund webhook
+**Then**:
+- Webhook signature verified
+- Subscription status changed to "Cancelled"
+- Bot removes Premium role within 5 seconds
+- Member receives DM: "Your subscription has been refunded"
+- Server owner sees updated dashboard (-1 active subscriber)
+
+### Test Case 4: Server Owner Limit Enforcement
+**Given**: Server owner on Base plan ($10/month, 500 members)
+**When**: They attempt to add 501st subscriber
+**Then**:
+- Checkout blocked with message: "Server limit reached. Upgrade to Unlimited plan"
+- Server owner prompted to upgrade ($29/month)
+- After upgrade payment, new subscriber can complete purchase
+- Dashboard shows "501/∞ members"
+
+### Test Case 5: Midtrans Webhook Retry Logic
+**Given**: Midtrans webhook temporarily unavailable (503)
+**When**: Webhook delivery fails
+**Then**:
+- Midtrans automatically retries (exponential backoff)
+- System handles duplicate webhook requests (idempotency key)
+- Role assigned only once even if webhook received 3 times
+- Error logged to Sentry for investigation
+
+---
+
+## 10) Success Metrics (North Star)
+
+**Primary Metric**: **Time-to-First-Value (T2FV)**
+- Goal: Server owner completes setup + receives first payment in <30 minutes
+
+**Secondary Metrics**:
+- **Activation Rate**: % of signups that invite bot (target: 60%)
+- **Conversion Rate**: % of activated servers that receive first payment (target: 40%)
+- **Monthly Churn**: % of server owners cancelling (target: <5%)
+- **NPS Score**: Server owner satisfaction (target: 50+)
+
+**Financial**:
+- **CAC (Customer Acquisition Cost)**: Target <$25/server owner
+- **LTV (Lifetime Value)**: Target >$120 (12 months × $10)
+- **LTV:CAC Ratio**: Target >4:1
+
+---
+
+## PRP Quality Checklist
+
+- [x] Target audience + problem statement are specific
+- [x] 3 concrete user journeys are defined
+- [x] Clear scope levels (Level 1/2/3)
+- [x] Minimal data model exists (6 entities with relationships)
+- [x] Tech stack is unambiguous (Bun + Vite + Hono + D1 + Drizzle + smoothui.dev)
+- [x] Checkpoints + acceptance tests are present (5 test cases)
+- [x] Security basics defined
+- [x] Constraints + non-goals listed
+
+---
