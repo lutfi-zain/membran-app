@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat:*)",
+      "Bash(opencode:*)",
+      "Bash(powershell.exe:*)",
+      "Bash(if:*)",
+      "Bash(then echo \"EXISTS\")",
+      "Bash(else echo \"NOT_FOUND\")",
+      "Bash(fi:*)",
+      "Bash(git rev-parse:*)",
+      "Bash(bun test)",
+      "Bash(bun run dev)",
+      "Bash(bun run db:generate)",
+      "Bash(npx wrangler d1 migrations apply:*)",
+      "Bash(curl:*)",
+      "Bash(http://127.0.0.1:8787/auth/me)",
+      "Bash(npx wrangler d1 execute:*)",
+      "Bash(http://127.0.0.1:8787/auth/connect/discord)",
+      "Bash(bun pm ls:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}
