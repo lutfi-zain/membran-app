@@ -442,10 +442,17 @@ router.get("/discord/callback", async (c) => {
       expires: expiresAt,
     });
 
-    return c.redirect("/onboarding");
+    // Redirect to frontend onboarding page
+    return c.redirect("http://localhost:5173/onboarding");
   } catch (e) {
     console.error("OAuth error:", e);
-    return c.json({ error: "OAuth failed", details: e instanceof Error ? e.message : String(e) }, 500);
+    return c.json(
+      {
+        error: "OAuth failed",
+        details: e instanceof Error ? e.message : String(e),
+      },
+      500,
+    );
   }
 });
 

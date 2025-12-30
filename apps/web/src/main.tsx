@@ -14,9 +14,11 @@ import "./index.css";
 import ForgotPasswordPage from "./pages/forgot-password";
 import LoginPage from "./pages/login";
 import OnboardingPage from "./pages/onboarding";
+import OnboardingBotPage from "./pages/onboarding/bot";
 import ResetPasswordPage from "./pages/reset-password";
 import SignupPage from "./pages/signup";
 import SettingsPage from "./pages/signup/settings";
+import SettingsBotPage from "./pages/settings/bot";
 import { VerificationBanner } from "./components/auth/VerificationBanner";
 
 const queryClient = new QueryClient();
@@ -60,6 +62,12 @@ const onboardingRoute = createRoute({
   component: OnboardingPage,
 });
 
+const onboardingBotRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/onboarding/bot",
+  component: OnboardingBotPage,
+});
+
 const forgotPasswordRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/forgot-password",
@@ -78,15 +86,23 @@ const settingsRoute = createRoute({
   component: SettingsPage,
 });
 
+const settingsBotRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/settings/bot",
+  component: SettingsBotPage,
+});
+
 // Create Router
 const routeTree = rootRoute.addChildren([
   indexRoute,
   loginRoute,
   signupRoute,
   onboardingRoute,
+  onboardingBotRoute,
   forgotPasswordRoute,
   resetPasswordRoute,
   settingsRoute,
+  settingsBotRoute,
 ]);
 
 const router = createRouter({ routeTree });

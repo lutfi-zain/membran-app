@@ -10,9 +10,12 @@ describe("Discord Connection", () => {
   });
 
   it("should return 401 for callback without session", async () => {
-    const res = await app.request("/auth/connect/discord/callback?code=test&state=test", {
-      method: "GET",
-    });
+    const res = await app.request(
+      "/auth/connect/discord/callback?code=test&state=test",
+      {
+        method: "GET",
+      },
+    );
     expect(res.status).toBe(401);
   });
 

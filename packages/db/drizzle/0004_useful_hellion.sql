@@ -1,0 +1,1 @@
+DROP INDEX `discord_servers_discord_id_unique`;

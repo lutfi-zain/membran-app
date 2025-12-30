@@ -3,11 +3,18 @@ import { cors } from "hono/cors";
 import { csrf } from "hono/csrf";
 import { sessionMiddleware } from "./middleware/session";
 import { authRouter } from "./routes/auth";
+import { botRouter } from "./routes/bot";
 
 type Bindings = {
   DB: D1Database;
   SESSION_SECRET: string;
   SENTRY_DSN?: string;
+  DISCORD_CLIENT_ID: string;
+  DISCORD_CLIENT_SECRET: string;
+  DISCORD_REDIRECT_URI: string;
+  DISCORD_BOT_TOKEN: string;
+  ENCRYPTION_KEY: string;
+  CRON_SECRET?: string;
 };
 
 const app = new Hono<{ Bindings: Bindings }>();
@@ -25,5 +32,7 @@ app.use("*", sessionMiddleware);
 
 app.get("/", (c) => c.text("Membran API"));
 app.route("/auth", authRouter);
+app.route("/api/auth", authRouter); // Also serve auth routes under /api for frontend consistency
+app.route("/api/bot", botRouter);
 
 export default app;
