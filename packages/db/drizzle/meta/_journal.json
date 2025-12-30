@@ -15,6 +15,27 @@
       "when": 1767068964528,
       "tag": "0001_motionless_boomerang",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1767097458118,
+      "tag": "0002_new_the_phantom",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1767100721501,
+      "tag": "0003_mighty_tyger_tiger",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1767122621652,
+      "tag": "0004_useful_hellion",
+      "breakpoints": true
     }
   ]
 }

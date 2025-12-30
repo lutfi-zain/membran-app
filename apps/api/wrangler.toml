@@ -9,5 +9,11 @@ database_name = "membran-db"
 database_id = "your-database-id"
 migrations_dir = "../../packages/db/drizzle"
 
+# Cron trigger for bot status sync (runs every 5 minutes)
+# Ensures bot status is kept in sync with Discord API
+[[triggers.crons]]
+cron = "*/5 * * * *"  # Every 5 minutes
+pattern = "*/5 * * * *"
+
 [vars]
 # Add env vars here

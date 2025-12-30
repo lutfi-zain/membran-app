@@ -18,7 +18,26 @@
       "Bash(npx wrangler d1 execute:*)",
       "Bash(http://127.0.0.1:8787/auth/connect/discord)",
       "Bash(bun pm ls:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git push:*)",
+      "Bash(gh:*)",
+      "Bash(git fetch:*)",
+      "Bash(ls:*)",
+      "Bash(xargs:*)",
+      "Bash(pwsh:*)",
+      "Bash(bun install)",
+      "Bash(bun install wrangler)",
+      "Bash(./node_modules/.bin/wrangler:*)",
+      "Bash(cd:*)",
+      "Bash(mkdir:*)",
+      "Bash(bun run build)",
+      "Bash(node ./node_modules/.bin/wrangler:*)",
+      "Bash(bun:*)",
+      "Bash(timeout:*)",
+      "Bash(\"https://discord.com/api/v10/users/@me/guilds\")",
+      "Bash(bunx:*)",
+      "Bash(node:*)",
+      "Bash(tasklist:*)"
     ]
   }
 }
