@@ -1,8 +1,10 @@
-# membran-app Development Guidelines
+﻿# membran-app Development Guidelines
 
 Auto-generated from all feature plans. Last updated: 2025-12-30
 
 ## Active Technologies
+- TypeScript 5.x / Bun 1.x + Hono (API framework), Drizzle ORM (database), TanStack Query (React data fetching), Zod (validation) (004-pricing-tier-config)
+- Cloudflare D1 (SQLite) (004-pricing-tier-config)
 
 - TypeScript / Bun 1.x + Hono, Drizzle ORM, TanStack Query, Arctic (Discord OAuth), Oslo (crypto utils), Zod (003-discord-bot-connection)
 
@@ -80,6 +82,7 @@ bun run lint
 - Error responses: JSON with `error` code and `message`
 
 ## Recent Changes
+- 004-pricing-tier-config: Added TypeScript 5.x / Bun 1.x + Hono (API framework), Drizzle ORM (database), TanStack Query (React data fetching), Zod (validation)
 
 - 003-discord-bot-connection: Added TypeScript / Bun 1.x + Hono, Drizzle ORM, TanStack Query, Arctic (Discord OAuth), Oslo (crypto utils), Zod
 
@@ -91,23 +94,11 @@ bun run lint
 
 Required for local development:
 - `DISCORD_CLIENT_ID`: Discord application client ID
-- `DISCORD_CLIENT_SECRET`: Discord application client secret
-- `DISCORD_BOT_TOKEN`: Discord bot token (for this feature)
-- `DISCORD_REDIRECT_URI`: OAuth redirect URI
-- `SESSION_SECRET`: Session encryption secret
-- `ENCRYPTION_KEY`: Token encryption key (32 bytes base64)
 
 ### Testing Conventions
 
-- Unit tests: Co-located with source files (`.test.ts` suffix)
-- Integration tests: In `apps/api/tests/integration/`
-- Use Bun test (`bun test`)
-- Mock external API calls (Discord API)
 
 ### Git Workflow
 
-- Feature branches: `###-feature-name` (e.g., `003-discord-bot-connection`)
-- Commit messages: Conventional Commits (feat:, fix:, docs:)
-- PR required before merging to main
 
 <!-- MANUAL ADDITIONS END -->

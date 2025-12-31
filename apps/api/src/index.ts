@@ -4,6 +4,8 @@ import { csrf } from "hono/csrf";
 import { sessionMiddleware } from "./middleware/session";
 import { authRouter } from "./routes/auth";
 import { botRouter } from "./routes/bot";
+import { rolesRouter } from "./routes/roles";
+import { pricingRouter } from "./routes/pricing";
 
 type Bindings = {
   DB: D1Database;
@@ -34,5 +36,7 @@ app.get("/", (c) => c.text("Membran API"));
 app.route("/auth", authRouter);
 app.route("/api/auth", authRouter); // Also serve auth routes under /api for frontend consistency
 app.route("/api/bot", botRouter);
+app.route("/api/roles", rolesRouter);
+app.route("/api/pricing", pricingRouter);
 
 export default app;

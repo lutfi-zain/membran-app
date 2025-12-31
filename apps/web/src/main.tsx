@@ -15,6 +15,7 @@ import ForgotPasswordPage from "./pages/forgot-password";
 import LoginPage from "./pages/login";
 import OnboardingPage from "./pages/onboarding";
 import OnboardingBotPage from "./pages/onboarding/bot";
+import OnboardingPricingPage from "./pages/onboarding/pricing";
 import ResetPasswordPage from "./pages/reset-password";
 import SignupPage from "./pages/signup";
 import SettingsPage from "./pages/signup/settings";
@@ -68,6 +69,12 @@ const onboardingBotRoute = createRoute({
   component: OnboardingBotPage,
 });
 
+const onboardingPricingRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/onboarding/pricing",
+  component: OnboardingPricingPage,
+});
+
 const forgotPasswordRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/forgot-password",
@@ -99,6 +106,7 @@ const routeTree = rootRoute.addChildren([
   signupRoute,
   onboardingRoute,
   onboardingBotRoute,
+  onboardingPricingRoute,
   forgotPasswordRoute,
   resetPasswordRoute,
   settingsRoute,

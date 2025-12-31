@@ -1,0 +1,847 @@
+openapi: 3.0.3
+info:
+  title: membran-app Pricing Tier API
+  description: API for managing pricing tier configurations for Discord server premium memberships
+  version: 1.0.0
+  contact:
+    name: membran-app
+    url: https://membran.app
+
+servers:
+  - url: http://localhost:8787
+    description: Local development server
+  - url: https://api.membran.app
+    description: Production server
+
+tags:
+  - name: pricing
+    description: Pricing tier management operations
+  - name: roles
+    description: Discord role synchronization
+
+paths:
+  /api/pricing/tiers:
+    get:
+      summary: List all pricing tiers for the authenticated user's server
+      operationId: listPricingTiers
+      tags: [pricing]
+      security:
+        - CookieAuth: []
+      responses:
+        '200':
+          description: List of pricing tiers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tiers:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PricingTierWithFeatures'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      summary: Create a new pricing tier
+      operationId: createPricingTier
+      tags: [pricing]
+      security:
+        - CookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePricingTierRequest'
+      responses:
+        '201':
+          description: Tier created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PricingTierWithFeatures'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/pricing/tiers/{tierId}:
+    get:
+      summary: Get a specific pricing tier
+      operationId: getPricingTier
+      tags: [pricing]
+      security:
+        - CookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/TierId'
+      responses:
+        '200':
+          description: Tier details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PricingTierWithFeatures'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      summary: Update a pricing tier
+      operationId: updatePricingTier
+      tags: [pricing]
+      security:
+        - CookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/TierId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePricingTierRequest'
+      responses:
+        '200':
+          description: Tier updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PricingTierWithFeatures'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Version conflict - tier was modified by another user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: VERSION_CONFLICT
+                message: This tier was modified by another user. Please refresh and try again.
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      summary: Delete a pricing tier
+      operationId: deletePricingTier
+      tags: [pricing]
+      security:
+        - CookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/TierId'
+      requestBody:
+        description: Confirmation required for tiers with active subscribers
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                confirm:
+                  type: boolean
+                  description: Must be true to delete tier with active subscribers
+              required: [confirm]
+      responses:
+        '200':
+          description: Tier deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    type: boolean
+                  message:
+                    type: string
+              example:
+                deleted: true
+                message: Tier has been deleted.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/pricing/tiers/reorder:
+    post:
+      summary: Reorder pricing tiers
+      operationId: reorderPricingTiers
+      tags: [pricing]
+      security:
+        - CookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tierIds:
+                  type: array
+                  items:
+                    type: string
+                  description: Tier IDs in new display order
+                  minItems: 1
+                  maxItems: 5
+              required: [tierIds]
+              example:
+                tierIds: ["tier_abc123", "tier_def456", "tier_ghi789"]
+      responses:
+        '200':
+          description: Tiers reordered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tiers:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PricingTier'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/pricing/preview:
+    get:
+      summary: Preview how tiers appear on public pricing page
+      operationId: previewPricingTiers
+      tags: [pricing]
+      security:
+        - CookieAuth: []
+      responses:
+        '200':
+          description: Formatted preview data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  server:
+                    $ref: '#/components/schemas/ServerInfo'
+                  featuredTier:
+                    $ref: '#/components/schemas/PricingTierWithFeatures'
+                  tiers:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PricingTierWithFeatures'
+                  currencySymbol:
+                    type: string
+                    example: "$"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/pricing/features/{tierId}:
+    post:
+      summary: Add a feature to a tier
+      operationId: addTierFeature
+      tags: [pricing]
+      security:
+        - CookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/TierId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFeatureRequest'
+      responses:
+        '201':
+          description: Feature added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TierFeature'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      summary: Update a tier feature
+      operationId: updateTierFeature
+      tags: [pricing]
+      security:
+        - CookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/TierId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                features:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/TierFeatureInput'
+              required: [features]
+      responses:
+        '200':
+          description: Features updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  features:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TierFeature'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/pricing/features/{tierId}/{featureId}:
+    delete:
+      summary: Delete a tier feature
+      operationId: deleteTierFeature
+      tags: [pricing]
+      security:
+        - CookieAuth: []
+      parameters:
+        - $ref: '#/components/parameters/TierId'
+        - $ref: '#/components/parameters/FeatureId'
+      responses:
+        '200':
+          description: Feature deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    type: boolean
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/roles/sync:
+    post:
+      summary: Sync Discord roles from the connected server
+      operationId: syncDiscordRoles
+      tags: [roles]
+      security:
+        - CookieAuth: []
+      responses:
+        '200':
+          description: Roles synced successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  synced:
+                    type: boolean
+                  roles:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DiscordRole'
+                  warnings:
+                    type: array
+                    items:
+                      type: string
+                  message:
+                    type: string
+              example:
+                synced: true
+                roles: []
+                warnings: []
+                message: "Synced 15 roles from Discord"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          description: Discord API unavailable - roles may be stale
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: DISCORD_API_UNAVAILABLE
+                message: Discord is currently unavailable. Using cached role data.
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/roles:
+    get:
+      summary: Get cached Discord roles for the user's server
+      operationId: listDiscordRoles
+      tags: [roles]
+      security:
+        - CookieAuth: []
+      responses:
+        '200':
+          description: List of Discord roles
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  roles:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DiscordRole'
+                  lastSynced:
+                    type: string
+                    format: date-time
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    CookieAuth:
+      type: apiKey
+      in: cookie
+      name: auth_session
+      description: Session cookie for authentication
+
+  parameters:
+    TierId:
+      name: tierId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: The pricing tier ID
+      example: tier_abc123xyz
+
+    FeatureId:
+      name: featureId
+      in: path
+      required: true
+      schema:
+        type: string
+      description: The tier feature ID
+      example: feat_xyz789abc
+
+  schemas:
+    PricingTier:
+      type: object
+      properties:
+        id:
+          type: string
+          example: tier_abc123xyz
+        discordServerId:
+          type: string
+          example: server_def456uvw
+        discordRoleId:
+          type: string
+          nullable: true
+          example: "987654321098765432"
+          description: Discord role snowflake, null if validation failed
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: Premium
+        description:
+          type: string
+          maxLength: 500
+          nullable: true
+          example: Access to all premium channels
+        priceCents:
+          type: integer
+          minimum: 0
+          maximum: 99900
+          example: 1000
+          description: Price in cents (1000 = $10.00)
+        currency:
+          type: string
+          enum: [USD]
+          example: USD
+        duration:
+          type: string
+          enum: [monthly, yearly, lifetime]
+          example: monthly
+        isFeatured:
+          type: boolean
+          example: true
+        isActive:
+          type: boolean
+          example: true
+        displayOrder:
+          type: integer
+          minimum: 1
+          example: 10
+        version:
+          type: integer
+          minimum: 1
+          example: 1
+          description: Optimistic locking version
+        needsSync:
+          type: boolean
+          example: false
+          description: Whether role validation needs retry
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - discordServerId
+        - name
+        - priceCents
+        - currency
+        - duration
+        - isFeatured
+        - isActive
+        - displayOrder
+        - version
+
+    TierFeature:
+      type: object
+      properties:
+        id:
+          type: string
+          example: feat_xyz789abc
+        tierId:
+          type: string
+          example: tier_abc123xyz
+        description:
+          type: string
+          minLength: 1
+          maxLength: 200
+          example: Access to VIP channels
+        displayOrder:
+          type: integer
+          minimum: 1
+          maximum: 20
+          example: 1
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - tierId
+        - description
+        - displayOrder
+
+    TierFeatureInput:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Feature ID (omit for new features)
+        description:
+          type: string
+          minLength: 1
+          maxLength: 200
+        displayOrder:
+          type: integer
+          minimum: 1
+          maximum: 20
+      required:
+        - description
+        - displayOrder
+
+    PricingTierWithFeatures:
+      allOf:
+        - $ref: '#/components/schemas/PricingTier'
+        - type: object
+          properties:
+            features:
+              type: array
+              items:
+                $ref: '#/components/schemas/TierFeature'
+            activeSubscriberCount:
+              type: integer
+              minimum: 0
+              description: Count of active subscribers (0 for MVP)
+              example: 0
+
+    CreatePricingTierRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: Premium
+        description:
+          type: string
+          maxLength: 500
+          nullable: true
+        priceCents:
+          type: integer
+          minimum: 0
+          maximum: 99900
+          example: 1000
+        duration:
+          type: string
+          enum: [monthly, yearly, lifetime]
+          example: monthly
+        discordRoleId:
+          type: string
+          example: "987654321098765432"
+        isFeatured:
+          type: boolean
+          example: false
+        displayOrder:
+          type: integer
+          minimum: 1
+          example: 10
+        features:
+          type: array
+          items:
+            type: object
+            properties:
+              description:
+                type: string
+                minLength: 1
+                maxLength: 200
+              displayOrder:
+                type: integer
+                minimum: 1
+                maximum: 20
+            required:
+              - description
+              - displayOrder
+          maxItems: 20
+      required:
+        - name
+        - priceCents
+        - duration
+        - discordRoleId
+
+    UpdatePricingTierRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+          nullable: true
+        priceCents:
+          type: integer
+          minimum: 0
+          maximum: 99900
+        duration:
+          type: string
+          enum: [monthly, yearly, lifetime]
+        discordRoleId:
+          type: string
+        isFeatured:
+          type: boolean
+        isActive:
+          type: boolean
+        displayOrder:
+          type: integer
+          minimum: 1
+        version:
+          type: integer
+          minimum: 1
+          description: Current version for optimistic locking
+      required:
+        - version
+
+    CreateFeatureRequest:
+      type: object
+      properties:
+        description:
+          type: string
+          minLength: 1
+          maxLength: 200
+          example: Access to VIP channels
+        displayOrder:
+          type: integer
+          minimum: 1
+          maximum: 20
+          example: 1
+      required:
+        - description
+        - displayOrder
+
+    DiscordRole:
+      type: object
+      properties:
+        id:
+          type: string
+          example: role_abc123
+        discordServerId:
+          type: string
+          example: server_def456
+        discordRoleId:
+          type: string
+          example: "987654321098765432"
+        roleName:
+          type: string
+          example: Premium Member
+        botCanManage:
+          type: boolean
+          example: true
+          description: Whether bot has permission to assign this role
+        position:
+          type: integer
+          example: 10
+        color:
+          type: integer
+          nullable: true
+          example: 16777215
+        hoist:
+          type: boolean
+          example: false
+        permissions:
+          type: string
+          nullable: true
+          example: "8,1024,2048"
+        syncedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - discordServerId
+        - discordRoleId
+        - roleName
+        - botCanManage
+
+    ServerInfo:
+      type: object
+      properties:
+        id:
+          type: string
+        discordId:
+          type: string
+        name:
+          type: string
+        icon:
+          type: string
+          nullable: true
+        memberCount:
+          type: integer
+      required:
+        - id
+        - discordId
+        - name
+        - memberCount
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error code for programmatic handling
+          enum:
+            - TIER_LIMIT_EXCEEDED
+            - FEATURE_LIMIT_EXCEEDED
+            - INVALID_PRICE_RANGE
+            - DUPLICATE_TIER_NAME
+            - ROLE_CANNOT_BE_MANAGED
+            - TIER_HAS_ACTIVE_SUBSCRIBERS
+            - LAST_TIER_CANNOT_DELETE
+            - VERSION_CONFLICT
+            - VALIDATION_ERROR
+            - UNAUTHORIZED
+            - NOT_FOUND
+            - INTERNAL_ERROR
+        message:
+          type: string
+          description: Human-readable error message
+        details:
+          type: object
+          description: Additional error details
+          additionalProperties: true
+      required:
+        - error
+        - message
+
+  responses:
+    BadRequest:
+      description: Bad request - validation error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: TIER_LIMIT_EXCEEDED
+            message: Maximum 5 tiers allowed per server
+            details:
+              currentCount: 5
+              maxAllowed: 5
+
+    Unauthorized:
+      description: Unauthorized - invalid or missing session
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: UNAUTHORIZED
+            message: No valid session
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: NOT_FOUND
+            message: Pricing tier not found
+
+    Conflict:
+      description: Conflict - resource state violates constraint
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: DUPLICATE_TIER_NAME
+            message: A tier with this name already exists
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: INTERNAL_ERROR
+            message: An unexpected error occurred
