@@ -1,6 +1,7 @@
 import { ConnectionStatus } from "../../components/bot/ConnectionStatus";
 import { PermissionWarning } from "../../components/bot/PermissionWarning";
 import { useBotStatus } from "../../hooks/useBotConnection";
+import { BackLink } from "../../components/navigation/BackLink";
 
 // ============================================================================
 // Settings Bot Status Page
@@ -18,6 +19,8 @@ export default function SettingsBotPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
+        <BackLink />
+
         {/* Header */}
         <div className="md:flex md:items-center md:justify-between mb-8">
           <div className="min-w-0 flex-1">

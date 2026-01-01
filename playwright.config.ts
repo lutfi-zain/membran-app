@@ -20,10 +20,12 @@ export default defineConfig({
     },
   ],
 
+  /*
   webServer: {
     // Don't start web server - assume it's already running
     command: "",
     port: 5173,
     reuseExistingServer: true,
   },
+  */
 });

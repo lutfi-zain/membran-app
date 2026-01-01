@@ -14,7 +14,7 @@
  * - GET /api/pricing/preview - Preview how tiers appear to potential subscribers
  */
 
-import { createDb, discordServers } from "@membran/db";
+import { createDb, discordServers, onboardingStates } from "@membran/db";
 import type {
   AddFeatureRequest,
   CreatePricingTierRequest,
@@ -215,6 +215,12 @@ router.post("/tiers", async (c) => {
       discordServerId: server.id,
       ...input,
     });
+
+    // Auto-update onboarding state: mark pricingConfigured=true
+    await db
+      .update(onboardingStates)
+      .set({ pricingConfigured: true, updatedAt: new Date() })
+      .where(eq(onboardingStates.userId, session.user.id));
 
     logger.info({
       event: "pricing_tier_created",

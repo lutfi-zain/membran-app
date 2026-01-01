@@ -7,9 +7,12 @@ import type {
   PricingTierWithFeatures,
   UpdatePricingTierRequest,
   ReorderPricingTiersRequest,
+  DiscordRolesResponse,
+  DiscordRolesSyncResponse,
 } from "@membran/shared";
 
 const API_BASE = "/api/pricing";
+const ROLES_API_BASE = "/api/roles";
 
 // ============================================================================
 // Types
@@ -48,6 +51,7 @@ export const pricingQueryKeys = {
   tiers: ["pricing", "tiers"] as const,
   tier: (tierId: string) => ["pricing", "tiers", tierId] as const,
   preview: ["pricing", "preview"] as const,
+  roles: ["roles"] as const,
 };
 
 // ============================================================================
@@ -91,7 +95,10 @@ export function usePricingTiers(options?: UsePricingTiersOptions) {
  *
  * Returns tier with features and subscriber counts
  */
-export function usePricingTier(tierId: string, options?: UsePricingTiersOptions) {
+export function usePricingTier(
+  tierId: string,
+  options?: UsePricingTiersOptions,
+) {
   return useQuery({
     queryKey: pricingQueryKeys.tier(tierId),
     queryFn: async (): Promise<PricingTierWithFeatures> => {
@@ -235,7 +242,9 @@ export function useUpdateTier(options?: UseUpdateTierOptions) {
     onSuccess: (data, variables) => {
       // Invalidate all pricing queries
       queryClient.invalidateQueries({ queryKey: pricingQueryKeys.tiers });
-      queryClient.invalidateQueries({ queryKey: pricingQueryKeys.tier(variables.tierId) });
+      queryClient.invalidateQueries({
+        queryKey: pricingQueryKeys.tier(variables.tierId),
+      });
       queryClient.invalidateQueries({ queryKey: pricingQueryKeys.preview });
       options?.onSuccess?.(data);
     },
@@ -260,9 +269,12 @@ export function useDeleteTier(options?: UseDeleteTierOptions) {
       tierId: string;
       confirm?: boolean;
     }): Promise<DeletePricingTierResponse> => {
-      const res = await fetch(`${API_BASE}/tiers/${tierId}?confirm=${confirm}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(
+        `${API_BASE}/tiers/${tierId}?confirm=${confirm}`,
+        {
+          method: "DELETE",
+        },
+      );
 
       if (!res.ok) {
         const error = await res.json().catch(() => ({
@@ -326,6 +338,63 @@ export function useReorderTiers(options?: UseReorderTiersOptions) {
 // ============================================================================
 // Utility Hooks
 // ============================================================================
+
+/**
+ * useDiscordRoles - Get cached Discord roles
+ */
+export function useDiscordRoles(options?: UsePricingTiersOptions) {
+  return useQuery({
+    queryKey: pricingQueryKeys.roles,
+    queryFn: async (): Promise<DiscordRolesResponse> => {
+      const res = await fetch(`${ROLES_API_BASE}`);
+
+      if (!res.ok) {
+        if (res.status === 404) {
+          return { roles: [], lastSynced: null };
+        }
+        const error = await res.json().catch(() => ({
+          error: "UNKNOWN_ERROR",
+          message: "Failed to fetch roles",
+        }));
+        throw new Error(error.message || "Failed to fetch roles");
+      }
+
+      return res.json();
+    },
+    retry: 1,
+    refetchOnWindowFocus: false,
+    onError: options?.onError,
+  });
+}
+
+/**
+ * useSyncRoles - Sync Discord roles from API
+ */
+export function useSyncRoles(options?: UsePricingTiersOptions) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (): Promise<DiscordRolesSyncResponse> => {
+      const res = await fetch(`${ROLES_API_BASE}/sync`, {
+        method: "POST",
+      });
+
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({
+          error: "UNKNOWN_ERROR",
+          message: "Failed to sync roles",
+        }));
+        throw new Error(error.message || "Failed to sync roles");
+      }
+
+      return res.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: pricingQueryKeys.roles });
+    },
+    onError: options?.onError,
+  });
+}
 
 /**
  * useTierCount - Get the count of active tiers

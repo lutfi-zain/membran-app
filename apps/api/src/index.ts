@@ -6,6 +6,7 @@ import { authRouter } from "./routes/auth";
 import { botRouter } from "./routes/bot";
 import { rolesRouter } from "./routes/roles";
 import { pricingRouter } from "./routes/pricing";
+import { onboardingRouter } from "./routes/onboarding";
 
 type Bindings = {
   DB: D1Database;
@@ -38,5 +39,6 @@ app.route("/api/auth", authRouter); // Also serve auth routes under /api for fro
 app.route("/api/bot", botRouter);
 app.route("/api/roles", rolesRouter);
 app.route("/api/pricing", pricingRouter);
+app.route("/api/onboarding", onboardingRouter);
 
 export default app;

@@ -5,6 +5,7 @@ import {
   createRootRoute,
   createRoute,
   createRouter,
+  redirect,
 } from "@tanstack/react-router";
 import React from "react";
 import ReactDOM from "react-dom/client";
@@ -20,7 +21,11 @@ import ResetPasswordPage from "./pages/reset-password";
 import SignupPage from "./pages/signup";
 import SettingsPage from "./pages/signup/settings";
 import SettingsBotPage from "./pages/settings/bot";
+import SettingsPricingPage from "./pages/settings/pricing";
 import { VerificationBanner } from "./components/auth/VerificationBanner";
+import { LandingPage } from "./components/navigation/LandingPage";
+import { Dashboard } from "./components/navigation/Dashboard";
+import { NotFound } from "./components/NotFound";
 
 const queryClient = new QueryClient();
 
@@ -32,17 +37,32 @@ const rootRoute = createRootRoute({
       <Outlet />
     </>
   ),
+  notFoundComponent: NotFound,
 });
 
 // Create Routes
+// Index Route - Landing Page with auth-aware redirect
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
-  component: () => (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 text-3xl font-bold">
-      Welcome to Membran
-    </div>
-  ),
+  beforeLoad: async ({ location }) => {
+    // Check if user is authenticated
+    try {
+      const res = await fetch("/api/auth/me");
+      if (res.ok) {
+        const data = await res.json();
+        if (data.user) {
+          // Authenticated users redirect to dashboard
+          throw redirect({ to: "/dashboard" });
+        }
+      }
+    } catch (e) {
+      // If redirect was thrown, re-throw it
+      if (e instanceof Error && "to" in e) throw e;
+      // Otherwise continue to landing page
+    }
+  },
+  component: LandingPage,
 });
 
 const loginRoute = createRoute({
@@ -60,6 +80,33 @@ const signupRoute = createRoute({
 const onboardingRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/onboarding",
+  beforeLoad: async ({ location }) => {
+    // Check authentication
+    const authRes = await fetch("/api/auth/me");
+    if (!authRes.ok) {
+      throw redirect({
+        to: "/login",
+        search: { return: location.href },
+      });
+    }
+
+    // Redirect to correct step based on onboarding state
+    const onboardingRes = await fetch("/api/onboarding/state");
+    if (onboardingRes.ok) {
+      const onboardingData = await onboardingRes.json();
+      if (onboardingData.completedAt) {
+        throw redirect({ to: "/dashboard" });
+      } else if (!onboardingData.botConnected) {
+        throw redirect({ to: "/onboarding/bot" });
+      } else if (!onboardingData.pricingConfigured) {
+        throw redirect({ to: "/onboarding/pricing" });
+      } else {
+        // Both complete but not marked - auto-complete and redirect
+        await fetch("/api/onboarding/complete", { method: "POST" });
+        throw redirect({ to: "/dashboard" });
+      }
+    }
+  },
   component: OnboardingPage,
 });
 
@@ -90,13 +137,106 @@ const resetPasswordRoute = createRoute({
 const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/settings",
-  component: SettingsPage,
+  beforeLoad: async () => {
+    throw redirect({ to: "/settings/bot" });
+  },
 });
 
 const settingsBotRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/settings/bot",
+  beforeLoad: async ({ location }) => {
+    // Check authentication
+    const authRes = await fetch("/api/auth/me");
+    if (!authRes.ok) {
+      throw redirect({
+        to: "/login",
+        search: { return: location.href },
+      });
+    }
+
+    // Check onboarding state - redirect to onboarding if incomplete
+    const onboardingRes = await fetch("/api/onboarding/state");
+    if (onboardingRes.ok) {
+      const onboardingData = await onboardingRes.json();
+      if (!onboardingData.botConnected) {
+        throw redirect({ to: "/onboarding/bot" });
+      }
+    }
+  },
   component: SettingsBotPage,
+});
+
+// Dashboard Route - Authenticated hub with onboarding check
+const dashboardRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/dashboard",
+  beforeLoad: async ({ location }) => {
+    // Check authentication
+    const authRes = await fetch("/api/auth/me");
+    if (!authRes.ok) {
+      throw redirect({
+        to: "/login",
+        search: { return: location.href },
+      });
+    }
+
+    const authData = await authRes.json();
+    if (!authData.user) {
+      throw redirect({
+        to: "/login",
+        search: { return: location.href },
+      });
+    }
+
+    // Check onboarding state
+    const onboardingRes = await fetch("/api/onboarding/state");
+    if (onboardingRes.ok) {
+      const onboardingData = await onboardingRes.json();
+      if (!onboardingData.completedAt) {
+        if (!onboardingData.botConnected) {
+          throw redirect({ to: "/onboarding/bot" });
+        } else if (!onboardingData.pricingConfigured) {
+          throw redirect({ to: "/onboarding/pricing" });
+        }
+      }
+    }
+  },
+  component: Dashboard,
+});
+
+// Settings Pricing Route - Missing from route tree
+const settingsPricingRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/settings/pricing",
+  beforeLoad: async ({ location }) => {
+    // Check authentication
+    const authRes = await fetch("/api/auth/me");
+    if (!authRes.ok) {
+      throw redirect({
+        to: "/login",
+        search: { return: location.href },
+      });
+    }
+
+    const authData = await authRes.json();
+    if (!authData.user) {
+      throw redirect({
+        to: "/login",
+        search: { return: location.href },
+      });
+    }
+
+    // Check onboarding state
+    const onboardingRes = await fetch("/api/onboarding/state");
+    if (onboardingRes.ok) {
+      const onboardingData = await onboardingRes.json();
+      if (!onboardingData.botConnected) {
+        throw redirect({ to: "/onboarding/bot" });
+      }
+    }
+  },
+  component: SettingsPricingPage,
 });
 
 // Create Router
@@ -104,6 +244,7 @@ const routeTree = rootRoute.addChildren([
   indexRoute,
   loginRoute,
   signupRoute,
+  dashboardRoute,
   onboardingRoute,
   onboardingBotRoute,
   onboardingPricingRoute,
@@ -111,6 +252,7 @@ const routeTree = rootRoute.addChildren([
   resetPasswordRoute,
   settingsRoute,
   settingsBotRoute,
+  settingsPricingRoute,
 ]);
 
 const router = createRouter({ routeTree });

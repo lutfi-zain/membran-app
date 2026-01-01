@@ -31,7 +31,31 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+### Required Constitution Compliance
+
+- [ ] **Testing Discipline (NON-NEGOTIABLE)**: E2E tests MUST be planned for each implementation phase
+  - [ ] Frontend: Playwright tests for user interactions, forms, visual states
+  - [ ] Backend: Playwright tests for API contracts, auth, error handling
+  - [ ] Integration: Tests covering frontend-backend communication flows
+- [ ] **Security First**: Input validation, least privilege, no secret exposure
+- [ ] **Type Safety**: TypeScript strict mode, explicit types, Zod for external data
+- [ ] **API-First Design**: RESTful conventions, consistent error formats, schema documentation
+- [ ] **User-Centric Development**: Incremental value, clear user feedback, accessibility
+
+### E2E Testing Gate
+
+Each implementation phase MUST include:
+- [ ] Test file creation (e.g., `tests/[feature-name].spec.ts`)
+- [ ] Tests written and passing before phase completion
+- [ ] Coverage for: happy path, error cases, edge cases
+- [ ] Full test suite passes with no regressions
+
+### Architecture & Scope Review
+
+- [ ] Technology stack compliance (Bun, React, Hono, Cloudflare Workers, D1, Drizzle)
+- [ ] Monorepo structure within limits (apps/, packages/)
+- [ ] Dependencies: only Arctic/Oslo for auth/crypto, Midtrans for payments
+- [ ] Performance constraints met (response times, memory limits)
 
 ## Project Structure
 
