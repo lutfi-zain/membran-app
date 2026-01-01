@@ -15,7 +15,7 @@
  */
 
 import { zValidator } from "@hono/zod-validator";
-import { createDb, discordServers, oauthStates, users } from "@membran/db";
+import { createDb, discordServers, oauthStates, users, onboardingStates } from "@membran/db";
 import {
   BotStatusEnum,
   DISCORD_PERMISSIONS,
@@ -309,6 +309,12 @@ router.get("/callback", async (c) => {
         createdAt: now,
       });
     }
+
+    // Auto-update onboarding state: mark botConnected=true
+    await db
+      .update(onboardingStates)
+      .set({ botConnected: true, updatedAt: now })
+      .where(eq(onboardingStates.userId, session.user.id));
 
     const serverId = existingServer?.id || null;
 

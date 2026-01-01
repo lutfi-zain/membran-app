@@ -1,6 +1,7 @@
 import { zValidator } from "@hono/zod-validator";
 import {
   createDb,
+  onboardingStates,
   passwordResetTokens,
   sessions,
   users,
@@ -56,6 +57,18 @@ router.post("/signup", zValidator("json", SignupSchema), async (c) => {
     id: userId,
     email,
     passwordHash,
+  });
+
+  // Create onboarding state for new user
+  const now = new Date();
+  await db.insert(onboardingStates).values({
+    id: generateId(25),
+    userId,
+    botConnected: false,
+    pricingConfigured: false,
+    completedAt: null,
+    createdAt: now,
+    updatedAt: now,
   });
 
   const verificationToken = generateVerificationToken();
@@ -124,7 +137,25 @@ router.post("/login", zValidator("json", LoginSchema), async (c) => {
     expires: expiresAt,
   });
 
-  return c.json({ success: true });
+  // Create onboarding state if it doesn't exist (for users created before this feature)
+  const existingOnboarding = await db.query.onboardingStates.findFirst({
+    where: (onboardingStates, { eq }) => eq(onboardingStates.userId, user.id),
+  });
+
+  if (!existingOnboarding) {
+    const now = new Date();
+    await db.insert(onboardingStates).values({
+      id: generateId(25),
+      userId: user.id,
+      botConnected: false,
+      pricingConfigured: false,
+      completedAt: null,
+      createdAt: now,
+      updatedAt: now,
+    });
+  }
+
+  return c.json({ success: true, redirectTo: "/dashboard" });
 });
 
 router.post("/logout", async (c) => {

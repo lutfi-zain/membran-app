@@ -37,7 +37,20 @@
       "Bash(\"https://discord.com/api/v10/users/@me/guilds\")",
       "Bash(bunx:*)",
       "Bash(node:*)",
-      "Bash(tasklist:*)"
+      "Bash(tasklist:*)",
+      "Skill(speckit.specify)",
+      "Skill(speckit.implement)",
+      "Bash(npx playwright test:*)",
+      "Bash(netstat:*)",
+      "Bash(taskkill:*)",
+      "Bash(findstr:*)",
+      "Bash(git commit:*)",
+      "Bash(git checkout:*)",
+      "Bash(git pull:*)",
+      "Bash(git merge:*)",
+      "Bash(npx playwright:*)",
+      "Bash(then find specs/005-navigation-routing/checklists -name \"*.md\" -type f)",
+      "Bash(else:*)"
     ]
   }
 }

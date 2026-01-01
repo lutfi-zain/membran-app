@@ -20,4 +20,9 @@ build/
 Thumbs.db
 
 # Logs
-*.log
+
+# Testing
+coverage/
+playwright-report/
+test-results/
+

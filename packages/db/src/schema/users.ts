@@ -1,6 +1,7 @@
 import { relations, sql } from "drizzle-orm";
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { sessions } from "./sessions";
+import { onboardingStates } from "./onboarding-state";
 
 export const users = sqliteTable("users", {
   id: text("id").primaryKey(),
@@ -19,10 +20,14 @@ export const users = sqliteTable("users", {
     .default(sql`(strftime('%s', 'now'))`),
 });
 
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ many, one }) => ({
   sessions: many(sessions),
   passwordResetTokens: many(passwordResetTokens),
   verificationTokens: many(verificationTokens),
+  onboardingState: one(onboardingStates, {
+    fields: [onboardingStates.userId],
+    references: [users.id],
+  }),
 }));
 
 export const passwordResetTokens = sqliteTable("password_reset_tokens", {

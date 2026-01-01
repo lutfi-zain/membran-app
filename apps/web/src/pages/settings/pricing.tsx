@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { TierList } from "../../components/pricing/TierList";
-import { usePricingTiers, useTierCount, useDiscordRoles, useSyncRoles } from "../../hooks/usePricingTiers";
+import {
+  usePricingTiers,
+  useTierCount,
+  useDiscordRoles,
+  useSyncRoles,
+} from "../../hooks/usePricingTiers";
 import { formatCents } from "../../lib/currency";
+import { BackLink } from "../../components/navigation/BackLink";
 
 // ============================================================================
 // Settings Pricing Page
@@ -28,11 +34,14 @@ export default function SettingsPricingPage() {
   const [showPreview, setShowPreview] = useState(false);
 
   // Calculate stats
-  const totalSubscribers = tiers?.reduce((sum, tier) => sum + (tier.activeSubscriberCount || 0), 0) ?? 0;
+  const totalSubscribers =
+    tiers?.reduce((sum, tier) => sum + (tier.activeSubscriberCount || 0), 0) ??
+    0;
   const featuredTier = tiers?.find((t) => t.isFeatured);
-  const averagePrice = tiers && tiers.length > 0
-    ? tiers.reduce((sum, tier) => sum + tier.priceCents, 0) / tiers.length
-    : 0;
+  const averagePrice =
+    tiers && tiers.length > 0
+      ? tiers.reduce((sum, tier) => sum + tier.priceCents, 0) / tiers.length
+      : 0;
 
   // Handlers
   const handleSyncRoles = () => {
@@ -51,6 +60,8 @@ export default function SettingsPricingPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
+        <BackLink />
+
         {/* Header */}
         <div className="md:flex md:items-center md:justify-between mb-8">
           <div className="min-w-0 flex-1">
@@ -77,7 +88,11 @@ export default function SettingsPricingPage() {
               "
             >
               <svg
-                className={syncRoles.isPending ? "animate-spin -ml-1 mr-2 h-4 w-4" : "w-4 h-4 mr-2"}
+                className={
+                  syncRoles.isPending
+                    ? "animate-spin -ml-1 mr-2 h-4 w-4"
+                    : "w-4 h-4 mr-2"
+                }
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -155,10 +170,14 @@ export default function SettingsPricingPage() {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-500">Active Tiers</p>
+                <p className="text-sm font-medium text-gray-500">
+                  Active Tiers
+                </p>
                 <p className="mt-1 text-3xl font-semibold text-gray-900">
                   {count}
-                  <span className="text-lg font-normal text-gray-500">/{maxTiers}</span>
+                  <span className="text-lg font-normal text-gray-500">
+                    /{maxTiers}
+                  </span>
                 </p>
               </div>
               <div className="p-3 bg-indigo-50 rounded-lg">
@@ -184,7 +203,9 @@ export default function SettingsPricingPage() {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-500">Total Subscribers</p>
+                <p className="text-sm font-medium text-gray-500">
+                  Total Subscribers
+                </p>
                 <p className="mt-1 text-3xl font-semibold text-gray-900">
                   {totalSubscribers}
                 </p>
@@ -212,7 +233,9 @@ export default function SettingsPricingPage() {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-500">Average Price</p>
+                <p className="text-sm font-medium text-gray-500">
+                  Average Price
+                </p>
                 <p className="mt-1 text-3xl font-semibold text-gray-900">
                   {formatCents(Math.round(averagePrice))}
                 </p>
@@ -240,13 +263,20 @@ export default function SettingsPricingPage() {
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-500">Featured Tier</p>
+                <p className="text-sm font-medium text-gray-500">
+                  Featured Tier
+                </p>
                 <p className="mt-1 text-lg font-semibold text-gray-900 truncate">
                   {featuredTier?.name || "None set"}
                 </p>
                 {featuredTier && (
                   <p className="text-sm text-gray-500">
-                    {formatCents(featuredTier.priceCents)}/{featuredTier.duration === "monthly" ? "mo" : featuredTier.duration === "yearly" ? "yr" : "lifetime"}
+                    {formatCents(featuredTier.priceCents)}/
+                    {featuredTier.duration === "monthly"
+                      ? "mo"
+                      : featuredTier.duration === "yearly"
+                        ? "yr"
+                        : "lifetime"}
                   </p>
                 )}
               </div>
@@ -268,23 +298,35 @@ export default function SettingsPricingPage() {
         <div className="space-y-6">
           {/* Roles Sync Status */}
           {rolesData && (
-            <section aria-labelledby="roles-status-heading" className="bg-white shadow rounded-lg p-6">
-              <h2 id="roles-status-heading" className="text-lg font-medium text-gray-900 mb-4">
+            <section
+              aria-labelledby="roles-status-heading"
+              className="bg-white shadow rounded-lg p-6"
+            >
+              <h2
+                id="roles-status-heading"
+                className="text-lg font-medium text-gray-900 mb-4"
+              >
                 Discord Roles
               </h2>
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">
-                    <span className="font-medium text-gray-900">{rolesData.roles.length}</span> roles synced from Discord
+                    <span className="font-medium text-gray-900">
+                      {rolesData.roles.length}
+                    </span>{" "}
+                    roles synced from Discord
                   </p>
                   {rolesData.lastSynced && (
                     <p className="text-xs text-gray-500 mt-1">
-                      Last synced: {new Date(rolesData.lastSynced).toLocaleString()}
+                      Last synced:{" "}
+                      {new Date(rolesData.lastSynced).toLocaleString()}
                     </p>
                   )}
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className={`h-2 w-2 rounded-full ${syncRoles.isPending ? "bg-yellow-400" : "bg-green-400"}`} />
+                  <div
+                    className={`h-2 w-2 rounded-full ${syncRoles.isPending ? "bg-yellow-400" : "bg-green-400"}`}
+                  />
                   <span className="text-sm text-gray-600">
                     {syncRoles.isPending ? "Syncing..." : "Synced"}
                   </span>
@@ -325,7 +367,8 @@ export default function SettingsPricingPage() {
                   1. Create Tiers
                 </h3>
                 <p className="text-sm text-gray-600">
-                  Define up to 5 pricing tiers with different prices and benefits. Each tier must be linked to a Discord role.
+                  Define up to 5 pricing tiers with different prices and
+                  benefits. Each tier must be linked to a Discord role.
                 </p>
               </div>
 
@@ -334,7 +377,8 @@ export default function SettingsPricingPage() {
                   2. Add Features
                 </h3>
                 <p className="text-sm text-gray-600">
-                  Add up to 20 features per tier to describe what members get (e.g., "Access to VIP channels", "Custom role color").
+                  Add up to 20 features per tier to describe what members get
+                  (e.g., "Access to VIP channels", "Custom role color").
                 </p>
               </div>
 
@@ -343,7 +387,8 @@ export default function SettingsPricingPage() {
                   3. Set Featured Tier
                 </h3>
                 <p className="text-sm text-gray-600">
-                  Mark one tier as "Featured" to highlight it on the public pricing page. This is typically your recommended option.
+                  Mark one tier as "Featured" to highlight it on the public
+                  pricing page. This is typically your recommended option.
                 </p>
               </div>
 
@@ -352,7 +397,8 @@ export default function SettingsPricingPage() {
                   4. Reorder Tiers
                 </h3>
                 <p className="text-sm text-gray-600">
-                  Drag and drop tiers to change their display order on the public pricing page.
+                  Drag and drop tiers to change their display order on the
+                  public pricing page.
                 </p>
               </div>
             </div>
@@ -415,13 +461,21 @@ export default function SettingsPricingPage() {
                                 {formatCents(tier.priceCents)}
                               </p>
                               <p className="text-sm text-gray-500 mb-4">
-                                /{tier.duration === "monthly" ? "month" : tier.duration === "yearly" ? "year" : "lifetime"}
+                                /
+                                {tier.duration === "monthly"
+                                  ? "month"
+                                  : tier.duration === "yearly"
+                                    ? "year"
+                                    : "lifetime"}
                               </p>
 
                               {tier.features.length > 0 && (
                                 <ul className="space-y-2">
                                   {tier.features.map((feature) => (
-                                    <li key={feature.id} className="flex items-start text-sm">
+                                    <li
+                                      key={feature.id}
+                                      className="flex items-start text-sm"
+                                    >
                                       <svg
                                         className="w-4 h-4 text-green-500 mr-2 flex-shrink-0 mt-0.5"
                                         fill="currentColor"
@@ -433,7 +487,9 @@ export default function SettingsPricingPage() {
                                           clipRule="evenodd"
                                         />
                                       </svg>
-                                      <span className="text-gray-600">{feature.description}</span>
+                                      <span className="text-gray-600">
+                                        {feature.description}
+                                      </span>
                                     </li>
                                   ))}
                                 </ul>

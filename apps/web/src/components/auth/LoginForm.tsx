@@ -1,5 +1,6 @@
 import type React from "react";
 import { useState } from "react";
+import { getValidReturnUrl } from "../../lib/navigation";
 
 export const LoginForm = () => {
   const [email, setEmail] = useState("");
@@ -28,7 +29,9 @@ export const LoginForm = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Login failed");
 
-      window.location.href = "/dashboard";
+      const params = new URLSearchParams(window.location.search);
+      const returnUrl = getValidReturnUrl(params);
+      window.location.href = returnUrl || "/dashboard";
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "An unexpected error occurred",
