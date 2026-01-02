@@ -15,7 +15,7 @@ export const pricingTiers = sqliteTable("pricing_tiers", {
   discordServerId: text("discord_server_id")
     .notNull()
     .references(() => discordServers.id, { onDelete: "cascade" }),
-  discordRoleId: text("discord_role_id").references(() => discordRoles.discordRoleId),
+  discordRoleId: text("discord_role_id").references(() => discordRoles.id, { onDelete: "set null" }),
   name: text("name").notNull(),
   description: text("description"),
   priceCents: integer("price_cents").notNull(),
@@ -53,7 +53,7 @@ export const pricingTiersRelations = relations(pricingTiers, ({ one, many }) => 
   }),
   discordRole: one(discordRoles, {
     fields: [pricingTiers.discordRoleId],
-    references: [discordRoles.discordRoleId],
+    references: [discordRoles.id],
   }),
   features: many(tierFeatures),
 }));

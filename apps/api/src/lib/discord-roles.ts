@@ -150,11 +150,13 @@ async function getBotRolePosition(
  *
  * @param db - Database instance from createDb(c.env.DB)
  * @param discordServerId - Internal database ID of the discord server
+ * @param botToken - Discord bot token from c.env.DISCORD_BOT_TOKEN
  * @returns Sync result with synced roles and any warnings
  */
 export async function syncDiscordRoles(
   db: Db,
   discordServerId: string,
+  botToken: string,
 ): Promise<SyncResult> {
   // Get server info from database
   const servers = await db
@@ -181,14 +183,14 @@ export async function syncDiscordRoles(
     // Fetch roles from Discord API
     const discordRolesData = await fetchDiscordRoles(
       server.discordId,
-      process.env.DISCORD_BOT_TOKEN!,
+      botToken,
     );
 
     // Get bot's role position for manageability check
-    const botUser = await getBotUser(process.env.DISCORD_BOT_TOKEN!);
+    const botUser = await getBotUser(botToken);
     const botRolePosition = await getBotRolePosition(
       server.discordId,
-      process.env.DISCORD_BOT_TOKEN!,
+      botToken,
     );
 
     // Upsert roles to database

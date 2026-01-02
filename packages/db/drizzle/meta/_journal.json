@@ -50,6 +50,13 @@
       "when": 1767167059795,
       "tag": "0006_big_robin_chapel",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1767301608574,
+      "tag": "0007_modern_wrecking_crew",
+      "breakpoints": true
     }
   ]
 }

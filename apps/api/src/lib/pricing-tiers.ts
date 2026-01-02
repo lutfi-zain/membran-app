@@ -76,6 +76,34 @@ export interface PricingTierWithFeatures extends PricingTier {
 }
 
 // ============================================================================
+// Helper Functions
+// ============================================================================
+
+/**
+ * Resolve Discord role snowflake to internal database UUID
+ *
+ * The frontend sends Discord role IDs (snowflakes), but our foreign key
+ * references the internal UUID (discord_roles.id). This helper resolves that.
+ */
+async function resolveDiscordRoleId(
+  db: Db,
+  discordServerId: string,
+  discordRoleIdSnowflake: string,
+): Promise<string | null> {
+  const role = await db
+    .select()
+    .from(discordRoles)
+    .where(
+      and(
+        eq(discordRoles.discordServerId, discordServerId),
+        eq(discordRoles.discordRoleId, discordRoleIdSnowflake),
+      ),
+    )
+    .limit(1);
+  return role[0]?.id ?? null;
+}
+
+// ============================================================================
 // Validation Functions
 // ============================================================================
 
@@ -202,7 +230,7 @@ export async function createPricingTier(
     description,
     priceCents,
     duration,
-    discordRoleId,
+    discordRoleId: discordRoleIdSnowflake,
     isFeatured = false,
     displayOrder,
     features = [],
@@ -216,6 +244,19 @@ export async function createPricingTier(
 
   // Validate name uniqueness
   await validateTierNameUnique(db, discordServerId, name);
+
+  // Resolve Discord role snowflake to internal UUID
+  const discordRoleId = await resolveDiscordRoleId(
+    db,
+    discordServerId,
+    discordRoleIdSnowflake,
+  );
+
+  if (!discordRoleId) {
+    const error: any = new Error("Discord role not found");
+    error.code = PRICING_ERROR_CODES.NOT_FOUND;
+    throw error;
+  }
 
   // Get next display order if not provided
   let finalDisplayOrder = displayOrder;
@@ -369,23 +410,39 @@ export async function updatePricingTier(
   tierId: string,
   input: UpdatePricingTierInput,
 ): Promise<PricingTierWithFeatures> {
-  const { version, ...updateData } = input;
+  const { version, discordRoleId: discordRoleIdSnowflake, ...restUpdateData } = input;
 
   // Get current tier
   const current = await getPricingTierById(db, tierId);
 
   // Validate name uniqueness if changing name
-  if (updateData.name && updateData.name !== current.name) {
-    await validateTierNameUnique(db, current.discordServerId, updateData.name, tierId);
+  if (restUpdateData.name && restUpdateData.name !== current.name) {
+    await validateTierNameUnique(db, current.discordServerId, restUpdateData.name, tierId);
   }
 
   // Validate price range if changing price
-  if (updateData.priceCents !== undefined) {
-    validatePriceRange(updateData.priceCents);
+  if (restUpdateData.priceCents !== undefined) {
+    validatePriceRange(restUpdateData.priceCents);
+  }
+
+  // Resolve Discord role ID if changing
+  let resolvedRoleId = current.discordRoleId;
+  if (discordRoleIdSnowflake !== undefined && discordRoleIdSnowflake !== current.discordRoleId) {
+    resolvedRoleId = await resolveDiscordRoleId(
+      db,
+      current.discordServerId,
+      discordRoleIdSnowflake,
+    );
+
+    if (!resolvedRoleId) {
+      const error: any = new Error("Discord role not found");
+      error.code = PRICING_ERROR_CODES.NOT_FOUND;
+      throw error;
+    }
   }
 
   // If setting as featured, unfeature other tiers
-  if (updateData.isFeatured === true) {
+  if (restUpdateData.isFeatured === true) {
     await db
       .update(pricingTiers)
       .set({ isFeatured: false })
@@ -402,7 +459,8 @@ export async function updatePricingTier(
   const result = await db
     .update(pricingTiers)
     .set({
-      ...updateData,
+      ...restUpdateData,
+      discordRoleId: resolvedRoleId,
       version: sql<number>`${pricingTiers.version} + 1`,
       updatedAt: new Date(),
     })

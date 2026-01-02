@@ -89,7 +89,7 @@ router.post("/sync", async (c) => {
 
   try {
     // Sync roles from Discord API
-    const result = await syncDiscordRoles(db, server.id);
+    const result = await syncDiscordRoles(db, server.id, c.env.DISCORD_BOT_TOKEN);
 
     logger.info({
       event: "roles_synced",
@@ -155,11 +155,15 @@ router.post("/sync", async (c) => {
  *
  * Only returns roles that the bot can manage (botCanManage = true).
  */
-router.get("/", async (c) => {
+// Handle GET requests to list roles (with or without trailing slash)
+router.get("/*", async (c) => {
+  const logger = createLogger(c);
+  logger.info({ event: "roles_get_called", path: c.req.path });
   const sessionId = getCookie(c, "auth_session");
 
   // Authentication check
   if (!sessionId) {
+    logger.warn({ event: "roles_get_no_session" });
     return c.json({ error: "UNAUTHORIZED", message: "No valid session" }, 401);
   }
 
@@ -174,6 +178,7 @@ router.get("/", async (c) => {
   });
 
   if (!session || session.expiresAt < new Date()) {
+    logger.warn({ event: "roles_get_invalid_session", sessionId });
     return c.json({ error: "UNAUTHORIZED", message: "Invalid session" }, 401);
   }
 
@@ -184,6 +189,7 @@ router.get("/", async (c) => {
   });
 
   if (!server) {
+    logger.warn({ event: "roles_get_no_server", userId: session.user.id });
     return c.json(
       { error: "NOT_FOUND", message: "No Discord server connected" },
       404,
