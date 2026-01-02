@@ -25,10 +25,14 @@ import { BackLink } from "../../components/navigation/BackLink";
  * Part of User Story 1-3: Pricing Tier Configuration
  */
 export default function SettingsPricingPage() {
-  const { data: tiers, isLoading: isLoadingTiers } = usePricingTiers();
+  const { data: tiersData, isLoading: isLoadingTiers, error: tiersError, refetch: refetchTiers } = usePricingTiers();
   const { count, canAddMore, maxTiers } = useTierCount();
-  const { data: rolesData, isLoading: isLoadingRoles } = useDiscordRoles();
+  const { data: rolesData, isLoading: isLoadingRoles, error: rolesError, refetch: refetchRoles } = useDiscordRoles();
   const syncRoles = useSyncRoles();
+
+  // Ensure tiers is always an array for defensive programming
+  const tiers = Array.isArray(tiersData) ? tiersData : [];
+  const roles = rolesData;
 
   // Preview modal state
   const [showPreview, setShowPreview] = useState(false);
@@ -56,6 +60,94 @@ export default function SettingsPricingPage() {
     // Refetch data when tiers change
     // The hooks will auto-refetch via invalidation
   };
+
+  const handleRetry = () => {
+    refetchTiers();
+    refetchRoles();
+  };
+
+  // Show loading state
+  if (isLoadingTiers && isLoadingRoles) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <svg
+            className="animate-spin h-12 w-12 text-indigo-600 mx-auto"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            />
+          </svg>
+          <p className="mt-4 text-gray-600">Loading pricing settings...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (tiersError || rolesError) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center max-w-md">
+          <svg
+            className="h-12 w-12 text-red-500 mx-auto"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <h2 className="mt-4 text-lg font-medium text-gray-900">
+            Failed to load pricing settings
+          </h2>
+          <p className="mt-2 text-sm text-gray-600">
+            {(tiersError as Error)?.message || (rolesError as Error)?.message || "An unexpected error occurred"}
+          </p>
+          <button
+            type="button"
+            onClick={handleRetry}
+            className="mt-6 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+          >
+            <svg
+              className="w-4 h-4 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              />
+            </svg>
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">

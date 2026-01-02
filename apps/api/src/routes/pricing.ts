@@ -29,6 +29,7 @@ import { PRICING_ERROR_CODES } from "@membran/shared";
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { getCookie } from "hono/cookie";
+import { alphabet, generateRandomString } from "oslo/crypto";
 import {
   addFeature,
   createPricingTier,
@@ -64,6 +65,9 @@ const router = new Hono<{ Bindings: PricingEnv }>();
 
 // Apply rate limiting to all pricing endpoints
 router.use("*", rateLimitMiddleware);
+
+// Helper function to generate IDs
+const generateId = (length: number) => generateRandomString(length, alphabet("0-9", "a-z"));
 
 // ============================================================================
 // GET /api/pricing/tiers - List Pricing Tiers
@@ -217,10 +221,28 @@ router.post("/tiers", async (c) => {
     });
 
     // Auto-update onboarding state: mark pricingConfigured=true
-    await db
-      .update(onboardingStates)
-      .set({ pricingConfigured: true, updatedAt: new Date() })
-      .where(eq(onboardingStates.userId, session.user.id));
+    // Use upsert pattern to handle case where onboarding state doesn't exist yet
+    const existingState = await db.query.onboardingStates.findFirst({
+      where: (onboardingStates, { eq }) => eq(onboardingStates.userId, session.user.id),
+    });
+
+    if (existingState) {
+      await db
+        .update(onboardingStates)
+        .set({ pricingConfigured: true, updatedAt: new Date() })
+        .where(eq(onboardingStates.userId, session.user.id));
+    } else {
+      const now = new Date();
+      await db.insert(onboardingStates).values({
+        id: generateId(25),
+        userId: session.user.id,
+        botConnected: false,
+        pricingConfigured: true,
+        completedAt: null,
+        createdAt: now,
+        updatedAt: now,
+      });
+    }
 
     logger.info({
       event: "pricing_tier_created",

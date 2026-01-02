@@ -31,7 +31,7 @@ export default function OnboardingPricingPage() {
 
   // Handlers
   const handleContinue = () => {
-    navigate({ to: "/settings" });
+    navigate({ to: "/dashboard" });
   };
 
   const handleSkip = () => {
@@ -40,8 +40,8 @@ export default function OnboardingPricingPage() {
       return;
     }
 
-    // Proceed to settings without pricing tiers
-    navigate({ to: "/settings" });
+    // Proceed to dashboard without pricing tiers
+    navigate({ to: "/dashboard" });
   };
 
   const handleCancelSkip = () => {

@@ -92,7 +92,7 @@ export function RoleSelector({
     },
   });
 
-  const selectedRole = roles?.find((r) => r.discordRoleId === value);
+  const selectedRole = roles?.find((r) => r.id === value);
 
   const handleSync = () => {
     syncRoles.mutate();
@@ -153,7 +153,7 @@ export function RoleSelector({
           >
             <option value="">{placeholder}</option>
             {roles?.map((role) => (
-              <option key={role.discordRoleId} value={role.discordRoleId}>
+              <option key={role.id} value={role.id}>
                 {role.roleName}
                 {!role.botCanManage && " (Cannot manage)"}
               </option>

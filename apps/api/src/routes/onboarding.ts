@@ -75,7 +75,7 @@ async function getAuthenticatedUser(
  *
  * Auto-creates a default onboarding state if one doesn't exist.
  */
-router.get("/", async (c) => {
+router.get("/state", async (c) => {
   const sessionId = getCookie(c, "auth_session");
 
   if (!sessionId) {
@@ -137,7 +137,7 @@ router.get("/", async (c) => {
  *
  * Called automatically by bot connection and pricing tier creation endpoints.
  */
-router.put("/", zValidator("json", UpdateOnboardingStateSchema), async (c) => {
+router.put("/state", zValidator("json", UpdateOnboardingStateSchema), async (c) => {
   const sessionId = getCookie(c, "auth_session");
 
   if (!sessionId) {

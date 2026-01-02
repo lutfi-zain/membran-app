@@ -27,7 +27,8 @@ export function Dashboard() {
     queryFn: async () => {
       const res = await fetch("/api/pricing/tiers");
       if (!res.ok) return [];
-      return res.json();
+      const data = await res.json();
+      return data.tiers || [];
     },
   });
 

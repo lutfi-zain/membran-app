@@ -84,7 +84,8 @@ export function usePricingTiers(options?: UsePricingTiersOptions) {
       const data: ListPricingTiersResponse = await res.json();
       return data.tiers;
     },
-    retry: 1,
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
     refetchOnWindowFocus: false,
     onError: options?.onError,
   });
@@ -361,7 +362,8 @@ export function useDiscordRoles(options?: UsePricingTiersOptions) {
 
       return res.json();
     },
-    retry: 1,
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
     refetchOnWindowFocus: false,
     onError: options?.onError,
   });
