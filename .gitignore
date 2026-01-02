@@ -5,6 +5,7 @@ node_modules/
 dist/
 build/
 .wrangler/
+.turbo/
 
 # Environment variables
 .env
@@ -25,4 +26,3 @@ Thumbs.db
 coverage/
 playwright-report/
 test-results/
-

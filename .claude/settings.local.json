@@ -50,7 +50,15 @@
       "Bash(git merge:*)",
       "Bash(npx playwright:*)",
       "Bash(then find specs/005-navigation-routing/checklists -name \"*.md\" -type f)",
-      "Bash(else:*)"
+      "Bash(else:*)",
+      "WebSearch",
+      "Bash(then find \"D:\\\\Projects\\\\1. WORKING\\\\membran-app\\\\specs\\\\006-dod-test-coverage\\\\checklists\" -name \"*.md\" -type f)",
+      "Bash(DOD_DEBUG=1 bun run dod:verify:*)",
+      "Bash(then find \"D:/Projects/1. WORKING/membran-app/specs/006-dod-test-coverage/checklists\" -name \"*.md\" -type f)",
+      "Bash(test:*)",
+      "Bash(npx tsc:*)",
+      "Bash(powershell:*)",
+      "Bash(echo:*)"
     ]
   }
 }

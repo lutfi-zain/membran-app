@@ -7,6 +7,8 @@ Auto-generated from all feature plans. Last updated: 2025-12-30
 - Cloudflare D1 (SQLite) (004-pricing-tier-config)
 - TypeScript 5.x / Bun 1.x + React 18, TanStack Router (v7), TanStack Query, Hono (for API state checks) (005-navigation-routing)
 - Cloudflare D1 (SQLite) - onboarding_state table (005-navigation-routing)
+- TypeScript 5.x / Bun 1.x + Zod (validation), gray-matter (frontmatter parsing), chalk (terminal output), glob (file matching) (006-dod-test-coverage)
+- File-based (prp.md parsing and modification), in-memory cache for results (006-dod-test-coverage)
 
 - TypeScript / Bun 1.x + Hono, Drizzle ORM, TanStack Query, Arctic (Discord OAuth), Oslo (crypto utils), Zod (003-discord-bot-connection)
 
@@ -84,10 +86,10 @@ bun run lint
 - Error responses: JSON with `error` code and `message`
 
 ## Recent Changes
+- 006-dod-test-coverage: Added TypeScript 5.x / Bun 1.x + Zod (validation), gray-matter (frontmatter parsing), chalk (terminal output), glob (file matching)
 - 005-navigation-routing: Added TypeScript 5.x / Bun 1.x + React 18, TanStack Router (v7), TanStack Query, Hono (for API state checks)
 - 004-pricing-tier-config: Added TypeScript 5.x / Bun 1.x + Hono (API framework), Drizzle ORM (database), TanStack Query (React data fetching), Zod (validation)
 
-- 003-discord-bot-connection: Added TypeScript / Bun 1.x + Hono, Drizzle ORM, TanStack Query, Arctic (Discord OAuth), Oslo (crypto utils), Zod
 
 ---
 

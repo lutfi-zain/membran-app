@@ -1,21 +1,22 @@
 <!--
 Sync Impact Report
 ==================
-Version change: 1.0.0 → 1.1.0
+Version change: 1.1.0 → 1.2.0
 
 Modified principles:
-- Testing Discipline: Expanded to require E2E testing for every implementation phase
+- Testing Discipline: Enhanced to include PRP.md checkpoint tracking
 
 Added sections:
-- E2E Testing Per Phase requirement (under Testing Discipline)
-- Explicit Phase Gate Testing definition
+- PRP Checkpoint Tracking (under Testing Discipline)
+- DOD-Based Testing requirement
 
 Removed sections: None
 
 Templates requiring updates:
-- .specify/templates/plan-template.md ✅ updated (added E2E testing gate requirements)
+- .specify/templates/plan-template.md ✅ (already includes checkpoint testing requirements)
 - .specify/templates/spec-template.md ✅ (no changes needed - testing section exists)
 - .specify/templates/tasks-template.md ✅ (already supports test task categorization)
+- prp.md ✅ (referenced as source of truth for checkpoints and DOD)
 
 Follow-up TODOs: None
 -->
@@ -32,11 +33,16 @@ All implementations MUST be tested after completion for both frontend and backen
   - Frontend components: Playwright tests for user interactions, form submissions, and visual states
   - Backend endpoints: Playwright tests for API contracts, authentication, and error handling
   - Integration points: Tests covering frontend-backend communication flows
+- **PRP Checkpoint Tracking**: After every task completion, developers MUST:
+  - Update the corresponding checkpoint in `prp.md` (section 7: Checkpoints & Definition of Done)
+  - Verify compliance with the DOD (Definition of Done) checklist for the completed milestone
+  - Run tests based on the acceptance criteria defined in the PRP checkpoints
+  - Mark checkpoints as complete only when all associated tests pass
 - Write or update relevant tests (unit, integration, or end-to-end as appropriate)
 - Run the full test suite to verify all tests pass
 - Ensure no regressions are introduced
 
-**Rationale**: Comprehensive testing prevents regressions, ensures code quality, and provides confidence in deployments. E2E testing at phase gates catches integration issues early, validates user flows end-to-end, and verifies the complete system works as designed before building more features on top. This applies equally to React frontend components and Hono backend endpoints.
+**Rationale**: Comprehensive testing prevents regressions, ensures code quality, and provides confidence in deployments. E2E testing at phase gates catches integration issues early, validates user flows end-to-end, and verifies the complete system works as designed before building more features on top. PRP checkpoint tracking ensures alignment with project milestones and verification against the original requirements. This applies equally to React frontend components and Hono backend endpoints.
 
 ### II. Security First (NON-NEGOTIABLE)
 
@@ -83,6 +89,18 @@ Features MUST be developed with the end user in mind. All implementations MUST:
 
 **Rationale**: Server owners and their members are the primary users; their experience determines product success.
 
+### VI. PRP Alignment (NON-NEGOTIABLE)
+
+All development work MUST align with the Product Requirements Prompt (prp.md). After every task completion:
+
+- **Checkpoint Updates**: Mark completed checkpoints in prp.md section 7
+- **DOD Verification**: Verify all Definition of Done criteria are met for the milestone
+- **Acceptance Testing**: Run tests based on acceptance test cases defined in prp.md section 9
+- **Security Compliance**: Ensure all Security Basics (section 7) are satisfied
+- **Constraint Verification**: Confirm all technical and business constraints (section 8) are respected
+
+**Rationale**: The PRP serves as the single source of truth for project requirements. Tracking progress against its checkpoints ensures the implementation stays aligned with the original vision and that no acceptance criteria are missed.
+
 ## Additional Constraints
 
 ### Technology Stack Requirements
@@ -107,6 +125,7 @@ Features MUST be developed with the end user in mind. All implementations MUST:
 
 - All PRs require at least one reviewer approval before merge
 - PRs MUST pass all tests (including E2E) and linting before approval
+- PRs MUST include prp.md checkpoint updates for completed milestones
 - Security-sensitive changes require additional security review
 - Breaking changes MUST have a migration strategy documented
 
@@ -116,14 +135,26 @@ Features MUST be developed with the end user in mind. All implementations MUST:
 - `bunx playwright test` - All E2E tests must pass
 - `npm run lint` - No linting errors (use configured Biome/ESLint rules)
 - TypeScript compilation must succeed with no type errors
+- prp.md checkpoints must be updated and verified
 
 ### Testing Expectations
 
 - **Every Phase**: E2E tests MUST be written and passing before phase completion
+- **Every Task**: PRP checkpoints MUST be updated and DOD verified after completion
 - New features SHOULD include unit tests for business logic
 - API endpoints SHOULD include integration tests
 - Critical user flows MUST include end-to-end tests
 - Tests MUST be independent and can run in any order
+
+### PRP Checkpoint Process
+
+1. **Before Implementation**: Review the relevant checkpoint in prp.md section 7
+2. **During Implementation**: Reference acceptance criteria from prp.md section 9
+3. **After Implementation**:
+   - Run tests to verify acceptance criteria are met
+   - Update the checkpoint in prp.md (mark completed items)
+   - Verify DOD requirements are satisfied
+   - Document any deviations or blockers
 
 ## Governance
 
@@ -136,6 +167,6 @@ This constitution supersedes all other development practices and guidelines. Ame
 
 **Compliance Verification**: All pull requests and code reviews MUST verify adherence to these principles. Violations MUST be corrected before merge.
 
-**Runtime Guidance**: Refer to `README.md` and feature specification documents for detailed implementation guidance.
+**Runtime Guidance**: Refer to `README.md`, `prp.md`, and feature specification documents for detailed implementation guidance.
 
-**Version**: 1.1.0 | **Ratified**: 2025-12-31 | **Last Amended**: 2025-12-31
+**Version**: 1.2.0 | **Ratified**: 2025-12-31 | **Last Amended**: 2026-01-01

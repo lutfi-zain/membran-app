@@ -72,7 +72,7 @@ export const LoginForm = () => {
 
       <div className="mt-4">
         <a
-          href="/api/auth/discord"
+          href="http://localhost:8787/api/auth/discord"
           className="w-full flex items-center justify-center py-2 px-4 bg-[#5865F2] text-white rounded-md hover:bg-[#4752C4]"
         >
           Continue with Discord

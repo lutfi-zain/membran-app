@@ -1,0 +1,35 @@
+title = "membran-app-secret-scanner"
+
+[extend]
+useDefault = true
+
+[[rules]]
+description = "Discord Bot Tokens"
+id = "discord-bot-token"
+regex = '''(?i)bot\.[a-zA-Z0-9_-]{23,}\.[a-zA-Z0-9_-]{6,}\.[a-zA-Z0-9_-]{27}'''
+
+[[rules]]
+description = "Midtrans API Keys"
+id = "midtrans-api-key"
+regex = '''(?i)(?:midtrans|server_key|client_key)[\s]*[:=][\s]*["']([a-z0-9_-]{20,})["']'''
+
+[[rules]]
+description = "Database URLs"
+id = "database-url"
+regex = '''(?i)(?:mongodb|mysql|postgresql|d1)://[^:]+:[^@]+@'''
+
+[allowlist]
+paths = [
+  "node_modules/",
+  ".turbo/",
+  "dist/",
+  "build/",
+  "coverage/",
+  ".git/"
+]
+
+regexes = [
+  "process\\.env\\.",
+  "\\$\\{[A-Z_]+\\}",
+  "\"?SK_TEST_|\"?PK_TEST_"
+]
