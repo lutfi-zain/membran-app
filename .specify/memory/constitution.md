@@ -1,22 +1,22 @@
 <!--
 Sync Impact Report
 ==================
-Version change: 1.1.0 → 1.2.0
+Version change: 1.2.0 -> 1.3.0
 
 Modified principles:
-- Testing Discipline: Enhanced to include PRP.md checkpoint tracking
+- None (adding new principle)
 
 Added sections:
-- PRP Checkpoint Tracking (under Testing Discipline)
-- DOD-Based Testing requirement
+- VII. Demo & Handoff (NON-NEGOTIABLE) - E2E happy flow headfull testing requirement
 
 Removed sections: None
 
 Templates requiring updates:
-- .specify/templates/plan-template.md ✅ (already includes checkpoint testing requirements)
-- .specify/templates/spec-template.md ✅ (no changes needed - testing section exists)
-- .specify/templates/tasks-template.md ✅ (already supports test task categorization)
-- prp.md ✅ (referenced as source of truth for checkpoints and DOD)
+- .specify/templates/plan-template.md - needs addition of demo phase/task (pending)
+- .specify/templates/tasks-template.md - needs addition of final demo task (pending)
+- .specify/templates/spec-template.md - no changes needed
+- .specify/templates/agent-file-template.md - no changes needed
+- README.md - no changes needed
 
 Follow-up TODOs: None
 -->
@@ -101,6 +101,25 @@ All development work MUST align with the Product Requirements Prompt (prp.md). A
 
 **Rationale**: The PRP serves as the single source of truth for project requirements. Tracking progress against its checkpoints ensures the implementation stays aligned with the original vision and that no acceptance criteria are missed.
 
+### VII. Demo & Handoff (NON-NEGOTIABLE)
+
+After completing any feature implementation, developers MUST perform an end-to-end demonstration in headfull mode to verify system stability and report progress. Before considering a feature complete:
+
+- **E2E Happy Flow Testing**: Run the complete user journey in headfull mode (visible browser) from start to finish
+  - Execute all critical paths: signup/login, core feature interaction, expected outcomes
+  - Verify the system works normally and remains stable throughout the flow
+  - Capture screenshots or video evidence of successful completion
+- **Progress Reporting**: Document and communicate what has been accomplished to stakeholders (Lutfi)
+  - Provide a clear summary of the feature's functionality
+  - Confirm the system is working as expected
+  - Note any observed issues or areas needing attention
+- **Integration Coordination**: If the feature requires external integrations that need manual setup:
+  - Clearly identify what manual actions are required from stakeholders
+  - Request assistance from Lutfi for logins to third-party apps, API keys, or other credentials
+  - Do not bypass or skip integration testing - wait for necessary access
+
+**Rationale**: Headfull E2E testing provides the ultimate validation that the system works end-to-end in a real browser environment. It catches issues that automated tests might miss (visual rendering, timing issues, third-party integration problems) and gives stakeholders confidence that the feature is production-ready. Clear reporting ensures alignment on progress and manual integration needs prevent security risks from hardcoded credentials.
+
 ## Additional Constraints
 
 ### Technology Stack Requirements
@@ -141,6 +160,7 @@ All development work MUST align with the Product Requirements Prompt (prp.md). A
 
 - **Every Phase**: E2E tests MUST be written and passing before phase completion
 - **Every Task**: PRP checkpoints MUST be updated and DOD verified after completion
+- **Every Feature**: Headfull E2E demo MUST be performed to report completion and verify stability
 - New features SHOULD include unit tests for business logic
 - API endpoints SHOULD include integration tests
 - Critical user flows MUST include end-to-end tests
@@ -156,6 +176,19 @@ All development work MUST align with the Product Requirements Prompt (prp.md). A
    - Verify DOD requirements are satisfied
    - Document any deviations or blockers
 
+### Demo & Handoff Process
+
+1. **Feature Complete**: All code written, tests passing, PRP checkpoints updated
+2. **Headfull E2E Demo**:
+   - Launch Playwright in headfull mode (`npx playwright test --ui` or `--headed`)
+   - Execute the complete happy path user journey
+   - Verify stability and correct behavior at each step
+3. **Report to Lutfi**:
+   - Summarize what was accomplished
+   - Confirm system is working normally and stable
+   - Flag any integration needs that require Lutfi's assistance
+4. **Wait for Integration**: If third-party app logins or credentials are needed, coordinate with Lutfi before marking complete
+
 ## Governance
 
 This constitution supersedes all other development practices and guidelines. Amendments follow this process:
@@ -169,4 +202,4 @@ This constitution supersedes all other development practices and guidelines. Ame
 
 **Runtime Guidance**: Refer to `README.md`, `prp.md`, and feature specification documents for detailed implementation guidance.
 
-**Version**: 1.2.0 | **Ratified**: 2025-12-31 | **Last Amended**: 2026-01-01
+**Version**: 1.3.0 | **Ratified**: 2025-12-31 | **Last Amended**: 2026-01-03
