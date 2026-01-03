@@ -1,54 +1,51 @@
 import { z } from 'zod';
 
-// T040: Subscription validation schemas
+/**
+ * Subscription status enum
+ */
+export const subscriptionStatusEnum = z.enum([
+  'Active',
+  'Pending',
+  'Expired',
+  'Cancelled',
+  'Failed',
+]);
+
+export type SubscriptionStatus = z.infer<typeof subscriptionStatusEnum>;
 
 /**
- * Subscription tier schema
+ * Subscription response schema
+ * Used for member portal display
  */
-export const tierSchema = z.object({
-  id: z.string().uuid({ message: 'Invalid tier ID' }),
-  name: z
-    .string()
-    .min(1, { message: 'Tier name is required' })
-    .max(100, { message: 'Tier name is too long (max 100 characters)' }),
-  description: z.string().optional(),
-  price: z
-    .number()
-    .nonnegative({ message: 'Price cannot be negative' }),
-  currency: z.string().length(3, { message: 'Invalid currency code (e.g., USD)' }),
-  interval: z.enum(['monthly', 'yearly'], {
-    errorMap: () => ({ message: 'Invalid billing interval' }),
+export const subscriptionResponseSchema = z.object({
+  id: z.string(),
+  memberId: z.string(),
+  serverId: z.string(),
+  tierId: z.string(),
+  status: subscriptionStatusEnum,
+  startDate: z.string(), // ISO 8601 datetime
+  expiryDate: z.string().nullable(), // ISO 8601 datetime
+  lastPaymentAmount: z.number().nullable(),
+  lastPaymentDate: z.string().nullable(), // ISO 8601 datetime
+  tier: z.object({
+    id: z.string(),
+    name: z.string(),
+    description: z.string().nullable(),
+    priceCents: z.number(),
+    currency: z.string(),
+    duration: z.enum(['monthly', 'yearly', 'lifetime']),
   }),
-  features: z.array(z.string()).optional(),
-  isActive: z.boolean().optional(),
+  isExpiringSoon: z.boolean().optional(), // Computed field
 });
 
-export type TierInput = z.infer<typeof tierSchema>;
+export type SubscriptionResponse = z.infer<typeof subscriptionResponseSchema>;
 
 /**
- * Subscription plan schema
+ * Subscription list response
  */
-export const planSchema = z.object({
-  tierId: z.string().uuid({ message: 'Invalid tier ID' }),
-  maxServers: z
-    .number()
-    .int()
-    .positive({ message: 'Max servers must be a positive integer' }),
-  maxUsers: z
-    .number()
-    .int()
-    .nonnegative({ message: 'Max users cannot be negative' }),
-  customFeatures: z.array(z.string()).optional(),
+export const subscriptionListResponseSchema = z.object({
+  success: z.boolean(),
+  data: z.array(subscriptionResponseSchema),
 });
 
-export type PlanInput = z.infer<typeof planSchema>;
-
-/**
- * Subscription update schema
- */
-export const subscriptionUpdateSchema = z.object({
-  tierId: z.string().uuid({ message: 'Invalid tier ID' }),
-  prorate: z.boolean().optional(),
-});
-
-export type SubscriptionUpdateInput = z.infer<typeof subscriptionUpdateSchema>;
+export type SubscriptionListResponse = z.infer<typeof subscriptionListResponseSchema>;

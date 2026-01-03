@@ -14,6 +14,8 @@
 - Q: When a member's Discord privacy settings prevent DMs, how should the system handle DM delivery failures for payment confirmations? → A: Create subscription and send email notification as fallback
 - Q: Can a single member have multiple active subscriptions to the same server, or should the system enforce only one active subscription per member per server? → A: One active subscription per member per server (new purchases replace or upgrade existing)
 - Q: When a member with an existing active subscription purchases a new tier (upgrade/downgrade), what should happen to the existing subscription's expiry date and any unused time? → A: Pro-rated credit applied from old tier to new tier (unused time credited toward new subscription)
+- Q: What is the relationship between "Subscription" and "MemberSubscription" entities mentioned in the spec? → A: They are the same - a Subscription represents a Discord member's relationship with a server's pricing tier. Use "Subscription" consistently (MemberSubscription removed)
+- Q: How should the pro-rated credit be calculated when upgrading/downgrading tiers? → A: Time-based method: credit = (unused days ÷ total days in period) × old tier price. Credit applied as discount on new tier payment, with expiry date recalculated from payment date
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -89,19 +91,19 @@ A server owner can manually assign or remove subscription roles for members thro
 
 ### Edge Cases
 
-- What happens when a member initiates payment but Midtrans webhook is delayed more than 5 minutes?
+- What happens when a member initiates payment but Midtrans webhook is delayed more than 5 minutes? → Webhook accepted up to 24 hours per FR-022, after that rejected with error
 - What happens when a payment is in "Pending" status but the member never completes payment? (Auto-cancelled after 1 hour)
-- How does system handle a member who starts checkout for Tier A but completes payment for Tier B (modified on Midtrans side)? (Pro-rated credit applied)
+- How does system handle a member who starts checkout for Tier A but completes payment for Tier B (modified on Midtrans side)? → System accepts webhook, applies pro-rated credit if member has existing subscription, creates subscription for Tier B
 - How does system handle tier upgrades/downgrades for members with existing active subscriptions? (Pro-rated credit from old tier applied to new tier)
-- What happens when Discord API is temporarily down during role assignment attempt?
+- What happens when Discord API is temporarily down during role assignment attempt? → Retry 3 times with exponential backoff per FR-023
 - How does system handle a member who has multiple pending payments for the same server? (System enforces one subscription; new payments replace/upgrade existing)
-- What happens when Midtrans sends a webhook for a transaction that was already processed (duplicate delivery)?
-- How does system handle a refund webhook for a subscription that was already cancelled?
-- What happens when a member's Discord account is deleted after subscription is active?
-- How does system handle webhook replay attacks where timestamp is manipulated?
-- What happens when a payment is confirmed but role assignment fails due to missing Discord permissions?
-- How does system handle a member who subscribes, gets role, then immediately refunds before role is fully assigned?
-- What happens when Discord DM delivery fails due to member privacy settings or blocked bot? (Email fallback notification sent)
+- What happens when Midtrans sends a webhook for a transaction that was already processed (duplicate delivery)? → System recognizes duplicate via transaction ID uniqueness and processes only once per FR-011
+- How does system handle a refund webhook for a subscription that was already cancelled? → Subscription remains cancelled, no action taken
+- What happens when a member's Discord account is deleted after subscription is active? → Subscription expires automatically at expiry date, notify server owner via activity log
+- How does system handle webhook replay attacks where timestamp is manipulated? → Timestamp validation rejects webhooks older than 24 hours per FR-022
+- What happens when a payment is confirmed but role assignment fails due to missing Discord permissions? → Validate bot permissions before assignment per FR-024, log failure, notify server owner
+- How does system handle a member who subscribes, gets role, then immediately refunds before role is fully assigned? → Refund webhook triggers role removal per FR-014
+- What happens when Discord DM delivery fails due to member privacy settings or blocked bot? → Email fallback notification sent per FR-012
 
 ## Requirements *(mandatory)*
 
@@ -135,15 +137,14 @@ A server owner can manually assign or remove subscription roles for members thro
 - **FR-026**: System MUST send a confirmation email with verification link upon member registration
 - **FR-027**: System MUST prevent subscription checkout until member's email is verified
 - **FR-028**: System MUST enforce only one active subscription per member per server; new purchases must replace or upgrade the existing subscription
-- **FR-029**: System MUST calculate and apply pro-rated credit from the old subscription's unused time toward the new subscription when a member upgrades or downgrades tiers
+- **FR-029**: System MUST calculate pro-rated credit using time-based method: credit = (unused days ÷ total days in billing period) × old tier price, then apply credit as discount on new tier payment and recalculate expiry date from payment date
 
 ### Key Entities
 
-- **Subscription**: Represents a member's subscription to a pricing tier, including status (Active, Pending, Expired, Cancelled, Failed), start date, expiry date, last payment amount, and Midtrans transaction ID
-- **Transaction**: Represents a payment transaction through Midtrans, including amount, currency, status (Pending, Success, Failed, Refunded), transaction ID, payment method, and timestamp
+- **Subscription**: Represents a Discord member's subscription to a specific server's pricing tier (the member-server relationship), including member Discord ID, server Discord ID, pricing tier ID, status (Active, Pending, Expired, Cancelled, Failed), start date, expiry date, last payment amount, and Midtrans transaction ID
+- **Transaction**: Represents a payment transaction through Midtrans, including amount, currency, status (Pending, Success, Failed, Refunded), transaction ID, payment method, applied pro-rated credit amount, and timestamp
 - **WebhookEvent**: Represents a received Midtrans webhook, including payload, signature verification status, processing status, and timestamp
 - **ActivityLog**: Represents an audit trail of actions (payment received, role assigned, role removed, manual intervention), including actor (system or server owner), action type, timestamp, and relevant IDs
-- **MemberSubscription**: Represents the relationship between a Discord member and a Discord server, including their current subscription, assigned roles, and connection status
 
 ## Success Criteria *(mandatory)*
 

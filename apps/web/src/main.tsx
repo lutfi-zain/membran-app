@@ -28,6 +28,8 @@ import { Dashboard } from "./components/navigation/Dashboard";
 import { NotFound } from "./components/NotFound";
 import { TestPage } from "./pages/test";
 import { DashboardDummyPage } from "./pages/dashboard-dummy";
+import { PricingPage } from "./pages/pricing";
+import { CheckoutPage } from "./pages/checkout";
 
 const queryClient = new QueryClient();
 
@@ -256,6 +258,20 @@ const dashboardDummyRoute = createRoute({
   component: DashboardDummyPage,
 });
 
+// Pricing Route - Public pricing page
+const pricingRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/pricing",
+  component: () => <PricingPage serverId="test-server-123" />,
+});
+
+// Checkout Route - Payment confirmation page
+const checkoutRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/checkout",
+  component: CheckoutPage,
+});
+
 // Create Router
 const routeTree = rootRoute.addChildren([
   indexRoute,
@@ -268,10 +284,12 @@ const routeTree = rootRoute.addChildren([
   forgotPasswordRoute,
   resetPasswordRoute,
   settingsRoute,
-testRoute,
+  testRoute,
   dashboardDummyRoute,
   settingsBotRoute,
   settingsPricingRoute,
+  pricingRoute,
+  checkoutRoute,
 ]);
 
 const router = createRouter({ routeTree });

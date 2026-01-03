@@ -54,6 +54,7 @@ type BotEnv = {
   DISCORD_BOT_TOKEN: string;
   ENCRYPTION_KEY: string;
   SESSION_SECRET: string;
+  APP_URL: string; // Frontend URL for redirects
   // For sync endpoint
   CRON_SECRET?: string;
 };
@@ -184,7 +185,7 @@ router.get("/callback", async (c) => {
   const errorDescription = c.req.query("error_description");
 
   // Frontend URL for redirects
-  const frontendUrl = "http://localhost:5173";
+  const frontendUrl = c.env.APP_URL || "http://localhost:5173";
 
   // Handle OAuth errors (user denied, etc.)
   if (error) {

@@ -7,6 +7,9 @@ import { botRouter } from "./routes/bot";
 import { rolesRouter } from "./routes/roles";
 import { pricingRouter } from "./routes/pricing";
 import { onboardingRouter } from "./routes/onboarding";
+import { webhooksRouter } from "./routes/webhooks";
+import { subscriptionsRouter } from "./routes/subscriptions";
+import { paymentsRouter } from "./routes/payments";
 
 type Bindings = {
   DB: D1Database;
@@ -38,7 +41,10 @@ app.route("/auth", authRouter);
 app.route("/api/auth", authRouter); // Also serve auth routes under /api for frontend consistency
 app.route("/api/bot", botRouter);
 app.route("/api/roles", rolesRouter);
+app.route("/webhooks", webhooksRouter);
+app.route("/api/subscriptions", subscriptionsRouter);
 app.route("/api/pricing", pricingRouter);
+app.route("/api/payments", paymentsRouter);
 app.route("/api/onboarding", onboardingRouter);
 
 export default app;
