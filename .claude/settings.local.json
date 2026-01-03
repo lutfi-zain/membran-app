@@ -58,7 +58,8 @@
       "Bash(test:*)",
       "Bash(npx tsc:*)",
       "Bash(powershell:*)",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "Bash(npx shadcn@latest mcp:*)"
     ]
   }
 }

@@ -1,0 +1,210 @@
+openapi: 3.0.3
+info:
+  title: membran.app Midtrans Webhook Contract
+  description: Incoming webhook contract from Midtrans payment gateway
+  version: 1.0.0
+
+tags:
+  - name: webhooks
+    description: Midtrans payment notification webhooks
+
+paths:
+  /webhooks/midtrans:
+    post:
+      tags:
+        - webhooks
+      summary: Process Midtrans payment notification
+      description: |
+        Receives and processes payment status notifications from Midtrans.
+        Webhook signature is verified using X-Signature header before processing.
+      parameters:
+        - name: X-Signature
+          in: header
+          required: true
+          description: |
+            SHA512 signature for webhook verification.
+            Computed as: SHA512(order_id + status_code + gross_amount + SERVER_KEY)
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MidtransWebhookPayload'
+            examples:
+              payment_success:
+                summary: Successful payment
+                value:
+                  transaction_status: capture
+                  transaction_id: abc123def456789
+                  status_code: 200
+                  gross_amount: 15000.00
+                  currency: IDR
+                  order_id: order_membran_123abc
+                  payment_type: gopay
+                  signature_key: abc123...
+                  fraud_status: accept
+                  payment_code: gopay123
+                  store_name: Merchant Store
+                  merchant_id: M123456
+
+              payment_pending:
+                summary: Pending payment (bank transfer)
+                value:
+                  transaction_status: pending
+                  transaction_id: xyz789abc456
+                  status_code: 201
+                  gross_amount: 15000.00
+                  currency: IDR
+                  order_id: order_membran_789xyz
+                  payment_type: bank_transfer
+                  signature_key: def456...
+                  permata_va_number: 1234567890
+
+              payment_failed:
+                summary: Failed payment
+                value:
+                  transaction_status: deny
+                  transaction_id: failed123
+                  status_code: 202
+                  gross_amount: 15000.00
+                  currency: IDR
+                  order_id: order_membran_failed
+                  payment_type: gopay
+                  signature_key: ghi789...
+                  fraud_status: deny
+
+              refund:
+                summary: Refunded payment
+                value:
+                  transaction_status: refund
+                  transaction_id: refund456
+                  status_code: 200
+                  gross_amount: 15000.00
+                  currency: IDR
+                  order_id: order_membran_refund
+                  payment_type: gopay
+                  signature_key: jkl012...
+                  fraud_status: accept
+      responses:
+        '200':
+          description: Webhook processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  message:
+                    type: string
+                    example: Webhook processed
+        '401':
+          description: Invalid signature
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Transaction not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    MidtransWebhookPayload:
+      type: object
+      required:
+        - transaction_status
+        - transaction_id
+        - status_code
+        - gross_amount
+        - order_id
+        - signature_key
+      properties:
+        transaction_status:
+          type: string
+          enum:
+            - capture
+            - settlement
+            - pending
+            - deny
+            - cancel
+            - expire
+            - refund
+            - partial_refund
+            - authorize
+          description: |
+            Midtrans transaction status mapping:
+            - capture/settlement: Payment successful
+            - pending: Awaiting payment
+            - deny/cancel/expire: Payment failed
+            - refund/partial_refund: Payment refunded
+        transaction_id:
+          type: string
+          description: Unique Midtrans transaction ID
+        status_code:
+          type: string
+          description: HTTP-like status code
+        gross_amount:
+          type: number
+          format: double
+          description: Transaction amount (may include decimals)
+        currency:
+          type: string
+          example: IDR
+        order_id:
+          type: string
+          description: Unique order ID from our system (for idempotency)
+        payment_type:
+          type: string
+          enum:
+            - credit_card
+            - gopay
+            - ovo
+            - dana
+            - bank_transfer
+            - shopeepay
+            - qris
+        signature_key:
+          type: string
+          description: SHA512 signature for verification
+        fraud_status:
+          type: string
+          enum: [accept, challenge, deny]
+          description: Fraud detection status
+        payment_code:
+          type: string
+          description: Payment code for bank transfers / e-wallets
+        store_name:
+          type: string
+          description: Merchant store name
+        merchant_id:
+          type: string
+          description: Midtrans merchant ID
+
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: "INVALID_SIGNATURE"
+            message:
+              type: string
+              example: "Webhook signature verification failed"

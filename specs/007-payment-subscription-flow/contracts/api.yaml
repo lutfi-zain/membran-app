@@ -1,0 +1,463 @@
+openapi: 3.0.3
+info:
+  title: membran.app Payment & Subscription API
+  description: API for payment processing, subscription management, and member portal
+  version: 1.0.0
+servers:
+  - url: https://api.membran.app
+    description: Production
+  - url: http://127.0.0.1:8787
+    description: Local development
+
+tags:
+  - name: payments
+    description: Payment initiation and management
+  - name: subscriptions
+    description: Subscription CRUD and member portal
+  - name: members
+    description: Manual role management for server owners
+  - name: auth
+    description: Email verification and OAuth flows
+
+paths:
+  /payments/create:
+    post:
+      tags:
+        - payments
+      summary: Create a payment transaction
+      description: Initiates a Midtrans payment transaction for a subscription tier
+      security:
+        - SessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - serverId
+                - tierId
+              properties:
+                serverId:
+                  type: string
+                  format: uuid
+                  description: Discord server ID
+                  example: "srv_123abc456def789"
+                tierId:
+                  type: string
+                  format: uuid
+                  description: Pricing tier ID
+                  example: "tier_abc123def456"
+      responses:
+        '201':
+          description: Payment transaction created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      transactionId:
+                        type: string
+                        format: uuid
+                        example: "txn_abc123def456"
+                      redirectUrl:
+                        type: string
+                        format: uri
+                        example: "https://app.midtrans.com/snap/v4/vtweb/..."
+                      expiry:
+                        type: string
+                        format: date-time
+                        example: "2026-01-03T12:00:00Z"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized - session invalid or email not verified
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflict - member already has active subscription
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /payments/{transactionId}:
+    get:
+      tags:
+        - payments
+      summary: Get payment transaction status
+      description: Retrieves the current status of a payment transaction
+      security:
+        - SessionAuth: []
+      parameters:
+        - name: transactionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Transaction details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Transaction'
+        '404':
+          description: Transaction not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /subscriptions:
+    get:
+      tags:
+        - subscriptions
+      summary: Get member subscriptions
+      description: Retrieves all subscriptions for the authenticated member
+      security:
+        - SessionAuth: []
+      responses:
+        '200':
+          description: List of subscriptions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Subscription'
+
+  /subscriptions/{subscriptionId}:
+    get:
+      tags:
+        - subscriptions
+      summary: Get subscription details
+      description: Retrieves detailed information about a specific subscription
+      security:
+        - SessionAuth: []
+      parameters:
+        - name: subscriptionId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Subscription details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Subscription'
+        '404':
+          description: Subscription not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /members/{memberId}/roles:
+    post:
+      tags:
+        - members
+      summary: Manually assign role to member
+      description: Server owner manually assigns a subscription role to a member
+      security:
+        - SessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - tierId
+              properties:
+                tierId:
+                  type: string
+                  format: uuid
+                  description: Pricing tier ID to assign
+      responses:
+        '200':
+          description: Role assigned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      subscriptionId:
+                        type: string
+                        format: uuid
+                      roleAssigned:
+                        type: boolean
+                        example: true
+        '400':
+          description: Bad request (member not connected, etc)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - not server owner
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /members/{memberId}/roles:
+    delete:
+      tags:
+        - members
+      summary: Manually remove role from member
+      description: Server owner manually removes a subscription role from a member
+      security:
+        - SessionAuth: []
+      responses:
+        '200':
+          description: Role removed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      subscriptionCancelled:
+                        type: boolean
+                        example: true
+                      roleRemoved:
+                        type: boolean
+                        example: true
+
+  /auth/send-verification:
+    post:
+      tags:
+        - auth
+      summary: Send email verification
+      description: Sends verification email to member's email address
+      security:
+        - SessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "member@example.com"
+      responses:
+        '200':
+          description: Verification email sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        '400':
+          description: Invalid email
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/verify-email:
+    get:
+      tags:
+        - auth
+      summary: Verify email address
+      description: Verifies email address using token from email link
+      parameters:
+        - name: token
+        - in: query
+        - required: true
+        - schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Email verified successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      emailVerified:
+                        type: boolean
+                        example: true
+        '400':
+          description: Invalid or expired token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  securitySchemes:
+    SessionAuth:
+      type: apiKey
+      in: cookie
+      name: session
+      description: Session cookie from Discord OAuth
+
+  schemas:
+    Subscription:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "sub_abc123def456"
+        memberId:
+          type: string
+          format: uuid
+          example: "mem_xyz789abc123"
+        serverId:
+          type: string
+          format: uuid
+          example: "srv_123abc456def789"
+        tier:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            name:
+              type: string
+              example: "Premium"
+            price:
+              type: integer
+              example: 1500
+              description: Price in cents
+            currency:
+              type: string
+              example: "IDR"
+            duration:
+              type: string
+              enum: [monthly, yearly]
+            features:
+              type: array
+              items:
+                type: string
+        status:
+          type: string
+          enum: [Active, Pending, Expired, Cancelled, Failed]
+          example: "Active"
+        startDate:
+          type: string
+          format: date-time
+          example: "2026-01-03T00:00:00Z"
+        expiryDate:
+          type: string
+          format: date-time
+          example: "2026-02-03T00:00:00Z"
+        lastPaymentAmount:
+          type: integer
+          example: 1500
+        lastPaymentDate:
+          type: string
+          format: date-time
+          example: "2026-01-03T10:30:00Z"
+
+    Transaction:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        subscriptionId:
+          type: string
+          format: uuid
+        midtransOrderId:
+          type: string
+        amount:
+          type: integer
+          example: 1500
+        currency:
+          type: string
+          example: "IDR"
+        status:
+          type: string
+          enum: [Pending, Success, Failed, Refunded]
+        paymentMethod:
+          type: string
+          example: "gopay"
+        paymentDate:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: "PAYMENT_FAILED"
+            message:
+              type: string
+              example: "Payment transaction could not be created"
+            details:
+              type: object
+              additionalProperties: true
