@@ -60,13 +60,16 @@ Applications need to manage client-side state (user preferences, UI state, tempo
 
 ### Edge Cases
 
-- What happens when shadcn component styles conflict with existing application styles?
-- How does the system handle Zod validation errors when the error messages need to be localized?
-- What happens when Zustand state becomes large and complex (performance degradation)?
-- How does the system handle network failures when validating data against remote schemas?
-- What happens when a component library component needs customization beyond the provided props?
-- How does the system handle concurrent state updates in Zustand from multiple components?
-- What happens when validation schemas are updated and existing data becomes invalid?
+**Acknowledged & Addressed in This Feature**:
+- ✅ **Concurrent state updates in Zustand**: Covered by T053, T066 (E2E tests for concurrent updates)
+- ⚠️ **Component style conflicts**: Mitigated by Tailwind CSS specificity conventions; documented in T079
+- ⚠️ **Large Zustand state performance**: Addressed by store splitting pattern (FR-020, T054/T056/T058), no explicit benchmark in scope
+
+**Acknowledged & Deferred to Future Features**:
+- 🔄 **Zod error message localization**: FR-014 marked as [DEFERRED] - i18n infrastructure not in scope
+- 🔄 **Network failures during remote validation**: Out of scope - validation is client-side only per architecture
+- 🔄 **Component customization beyond props**: Out of scope per spec.md:150 - can extend shadcn components manually when needed
+- 🔄 **Schema updates invalidating existing data**: Data migration strategy deferred to schema management feature
 
 ## Requirements *(mandatory)*
 
@@ -90,7 +93,9 @@ Applications need to manage client-side state (user preferences, UI state, tempo
 - **FR-011**: System MUST support schema composition and reuse (extend, merge, pick, omit)
 - **FR-012**: System MUST validate both user input and API responses
 - **FR-013**: System MUST support type inference from schemas for TypeScript integration
-- **FR-014**: System MUST allow internationalization of error messages
+- **FR-014** [DEFERRED]: System MUST allow internationalization of error messages
+  - **Status**: Deferred to future internationalization (i18n) feature
+  - **Rationale**: i18n infrastructure (translation management, locale detection) is out of scope per spec.md:153. Error message structure will be designed to be i18n-ready when that feature is implemented.
 
 **State Management (Zustand)**:
 
@@ -111,9 +116,15 @@ Applications need to manage client-side state (user preferences, UI state, tempo
 ### Measurable Outcomes
 
 - **SC-001**: Developers can build a new UI page 50% faster using pre-built components compared to building from scratch
+  - **Measurement**: Time-trial comparison of building a standardized 5-component form page (with Button, Input, Label, Card, Dialog) from scratch vs. using shadcn/ui components. Baseline: Average time for 3 developers to build without library. Target: ≤50% of baseline with library.
+  - **Validation Task**: T083 (add to Polish phase)
 - **SC-002**: 100% of UI components pass accessibility validation (WCAG 2.1 AA compliance)
-- **SC-003**: Developer onboarding time reduces by 40% when using the component library and standardized patterns
+- **SC-003**: Developer onboarding time reduces by 40% when using the component library and standardized patterns [DEFERRED TO POST-RELEASE]
+  - **Measurement**: Time from "repository clone" to "first approved PR" for new developers. Requires baseline data from at least 3 new hires before feature implementation.
+  - **Note**: Marked as deferred since this requires longitudinal data collection. Success will be assessed qualitatively via developer feedback during initial rollout.
 - **SC-004**: 95% of validation errors are caught on the client before reaching the server, reducing server load and improving user experience
+  - **Scope**: Applies to **newly implemented forms** using the Zod + shadcn integration patterns. Existing forms will be migrated incrementally in future features.
+  - **Measurement**: Ratio of client-side validation failures vs. server-side validation rejections in implemented forms, tracked via error monitoring.
 - **SC-005**: Application re-renders reduce by 60% when using centralized state management compared to prop drilling
 - **SC-006**: 90% of forms implement validation with clear, user-friendly error messages
 - **SC-007**: Component library supports consistent theming across 100% of application pages

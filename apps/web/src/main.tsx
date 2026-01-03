@@ -26,6 +26,8 @@ import { VerificationBanner } from "./components/auth/VerificationBanner";
 import { LandingPage } from "./components/navigation/LandingPage";
 import { Dashboard } from "./components/navigation/Dashboard";
 import { NotFound } from "./components/NotFound";
+import { TestPage } from "./pages/test";
+import { DashboardDummyPage } from "./pages/dashboard-dummy";
 
 const queryClient = new QueryClient();
 
@@ -239,6 +241,21 @@ const settingsPricingRoute = createRoute({
   component: SettingsPricingPage,
 });
 
+
+// Test Route - For component library testing
+const testRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/test",
+  component: TestPage,
+});
+
+// Dashboard Dummy Route - For theme showcase
+const dashboardDummyRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/dashboard-dummy",
+  component: DashboardDummyPage,
+});
+
 // Create Router
 const routeTree = rootRoute.addChildren([
   indexRoute,
@@ -251,6 +268,8 @@ const routeTree = rootRoute.addChildren([
   forgotPasswordRoute,
   resetPasswordRoute,
   settingsRoute,
+testRoute,
+  dashboardDummyRoute,
   settingsBotRoute,
   settingsPricingRoute,
 ]);

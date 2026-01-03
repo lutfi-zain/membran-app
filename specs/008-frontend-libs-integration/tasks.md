@@ -20,17 +20,21 @@ This is a monorepo frontend feature:
 - **Shared package**: `packages/shared/src/`
 - **Tests**: `apps/web/tests/e2e/`
 
+## Terminology
+
+This document uses "shadcn" as shorthand for "shadcn/ui" (the full library name). First mention in each context uses the full name; subsequent references use the shorthand.
+
 ---
 
 ## Phase 1: Setup (Shared Infrastructure)
 
 **Purpose**: Install dependencies and initialize library configurations
 
-- [ ] T001 Install shadcn/ui CLI and core dependencies (class-variance-authority, clsx, tailwind-merge) in apps/web
-- [ ] T002 Install Zod dependency in packages/shared
-- [ ] T003 Install Zustand dependency in apps/web
-- [ ] T004 [P] Install optional dev dependencies (react-hook-form, @hookform/resolvers, zustand-middleware-devtools) in apps/web
-- [ ] T005 Create utility function cn for className merging in apps/web/src/lib/cn.ts
+- [X] T001 Install shadcn/ui CLI and core dependencies (class-variance-authority, clsx, tailwind-merge) in apps/web
+- [X] T002 Install Zod dependency in packages/shared
+- [X] T003 Install Zustand dependency in apps/web
+- [X] T004 [P] Install optional dev dependencies (react-hook-form, @hookform/resolvers, zustand-middleware-devtools) in apps/web
+- [X] T005 Create utility function cn for className merging in apps/web/src/lib/cn.ts
 
 ---
 
@@ -40,12 +44,12 @@ This is a monorepo frontend feature:
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T006 Initialize shadcn/ui with CLI configuration (TypeScript, Tailwind, CSS variables, path aliases)
-- [ ] T007 Configure Tailwind for shadcn theming (colors, border-radius, darkMode) in apps/web/tailwind.config.ts
-- [ ] T008 Update global CSS with shadcn theme variables (CSS custom properties for colors, radius) in apps/web/src/styles/globals.css
-- [ ] T009 [P] Create components.json configuration file for shadcn component paths in apps/web/components.json
-- [ ] T010 [P] Create directory structure for Zustand stores at apps/web/src/stores/
-- [ ] T011 [P] Create directory structure for Zod schemas at packages/shared/src/schemas/
+- [X] T006 Initialize shadcn/ui with CLI configuration (TypeScript, Tailwind, CSS variables, path aliases)
+- [X] T007 Configure Tailwind for shadcn theming (colors, border-radius, darkMode) in apps/web/tailwind.config.ts
+- [X] T008 Update global CSS with shadcn theme variables (CSS custom properties for colors, radius) in apps/web/src/styles/globals.css
+- [X] T009 [P] Create components.json configuration file for shadcn component paths in apps/web/components.json
+- [X] T010 [P] Create directory structure for Zustand stores at apps/web/src/stores/
+- [X] T011 [P] Create directory structure for Zod schemas at packages/shared/src/schemas/
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -61,31 +65,31 @@ This is a monorepo frontend feature:
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T012 [P] [US1] Create E2E test for Button component rendering and interaction in apps/web/tests/e2e/components.spec.ts
-- [ ] T013 [P] [US1] Create E2E test for Input component keyboard navigation in apps/web/tests/e2e/components.spec.ts
-- [ ] T014 [P] [US1] Create E2E test for component accessibility (ARIA attributes) in apps/web/tests/e2e/components.spec.ts
-- [ ] T015 [P] [US1] Create E2E test for theme switching (light/dark mode) in apps/web/tests/e2e/components.spec.ts
+- [X] T012 [P] [US1] Create E2E test for Button component rendering and interaction in apps/web/tests/e2e/components.spec.ts
+- [X] T013 [P] [US1] Create E2E test for Input component keyboard navigation in apps/web/tests/e2e/components.spec.ts
+- [X] T014 [P] [US1] Create E2E test for component accessibility (ARIA attributes) in apps/web/tests/e2e/components.spec.ts
+- [X] T015 [P] [US1] Create E2E test for theme switching (light/dark mode) in apps/web/tests/e2e/components.spec.ts
 
 ### Implementation for User Story 1
 
-- [ ] T016 [P] [US1] Install Button component via shadcn CLI in apps/web
-- [ ] T017 [P] [US1] Install Input component via shadcn CLI in apps/web
-- [ ] T018 [P] [US1] Install Label component via shadcn CLI in apps/web
-- [ ] T019 [P] [US1] Install Card component via shadcn CLI in apps/web
-- [ ] T020 [P] [US1] Install Dialog component via shadcn CLI in apps/web
-- [ ] T021 [P] [US1] Install Form component via shadcn CLI in apps/web
-- [ ] T022 [P] [US1] Install FormField component via shadcn CLI in apps/web
-- [ ] T023 [P] [US1] Install FormItem component via shadcn CLI in apps/web
-- [ ] T024 [P] [US1] Install FormMessage component via shadcn CLI in apps/web
-- [ ] T025 [P] [US1] Install Select component via shadcn CLI in apps/web
-- [ ] T026 [P] [US1] Install Checkbox component via shadcn CLI in apps/web
-- [ ] T027 [P] [US1] Install RadioGroup component via shadcn CLI in apps/web
-- [ ] T028 [P] [US1] Install tailwindcss-animate plugin for animations in apps/web
-- [ ] T029 [US1] Create test page demonstrating all installed components in apps/web/src/pages/test.tsx
-- [ ] T030 [US1] Verify component files exist in apps/web/src/components/ui/ directory
-- [ ] T031 [US1] Test component rendering with different variants (sizes, colors) on test page
-- [ ] T032 [US1] Verify Tailwind CSS integration and component styling
-- [ ] T033 [US1] Test theme switching between light and dark modes with component updates
+- [X] T016 [P] [US1] Install Button component via shadcn CLI in apps/web
+- [X] T017 [P] [US1] Install Input component via shadcn CLI in apps/web
+- [X] T018 [P] [US1] Install Label component via shadcn CLI in apps/web
+- [X] T019 [P] [US1] Install Card component via shadcn CLI in apps/web
+- [X] T020 [P] [US1] Install Dialog component via shadcn CLI in apps/web
+- [X] T021 [P] [US1] Install Form component via shadcn CLI in apps/web
+- [X] T022 [P] [US1] Install FormField component via shadcn CLI in apps/web
+- [X] T023 [P] [US1] Install FormItem component via shadcn CLI in apps/web
+- [X] T024 [P] [US1] Install FormMessage component via shadcn CLI in apps/web
+- [X] T025 [P] [US1] Install Select component via shadcn CLI in apps/web
+- [X] T026 [P] [US1] Install Checkbox component via shadcn CLI in apps/web
+- [X] T027 [P] [US1] Install RadioGroup component via shadcn CLI in apps/web
+- [X] T028 [P] [US1] Install tailwindcss-animate plugin for animations in apps/web
+- [X] T029 [US1] Create test page demonstrating all installed components in apps/web/src/pages/test.tsx
+- [X] T030 [US1] Verify component files exist in apps/web/src/components/ui/ directory
+- [X] T031 [US1] Test component rendering with different variants (sizes, colors) on test page
+- [X] T032 [US1] Verify Tailwind CSS integration and component styling
+- [X] T033 [US1] Test theme switching between light and dark modes with component updates
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently. All P1 components render correctly with proper styling and accessibility.
 
@@ -101,25 +105,25 @@ This is a monorepo frontend feature:
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T034 [P] [US2] Create E2E test for email validation schema in apps/web/tests/e2e/validation.spec.ts
-- [ ] T035 [P] [US2] Create E2E test for password validation schema in apps/web/tests/e2e/validation.spec.ts
-- [ ] T036 [P] [US2] Create E2E test for API response validation in apps/web/tests/e2e/validation.spec.ts
-- [ ] T037 [P] [US2] Create E2E test for form validation error messages in apps/web/tests/e2e/validation.spec.ts
+- [X] T034 [P] [US2] Create E2E test for email validation schema in apps/web/tests/e2e/validation.spec.ts
+- [X] T035 [P] [US2] Create E2E test for password validation schema in apps/web/tests/e2e/validation.spec.ts
+- [X] T036 [P] [US2] Create E2E test for API response validation in apps/web/tests/e2e/validation.spec.ts
+- [X] T037 [P] [US2] Create E2E test for form validation error messages in apps/web/tests/e2e/validation.spec.ts
 
 ### Implementation for User Story 2
 
-- [ ] T038 [P] [US2] Create auth validation schemas (loginSchema, registerSchema) in packages/shared/src/schemas/auth.ts
-- [ ] T039 [P] [US2] Create payment validation schemas in packages/shared/src/schemas/payments.ts
-- [ ] T040 [P] [US2] Create subscription validation schemas in packages/shared/src/schemas/subscription.ts
-- [ ] T041 [US2] Create barrel export file for all schemas in packages/shared/src/schemas/index.ts
-- [ ] T042 [US2] Add custom error messages to schemas for user-friendly validation feedback
-- [ ] T043 [US2] Configure TypeScript path alias for @membran-app/shared in apps/web/tsconfig.json
-- [ ] T044 [US2] Test Zod schema validation with valid data
-- [ ] T045 [US2] Test Zod schema validation with invalid data and verify error messages
-- [ ] T046 [US2] Test TypeScript type inference from schemas
-- [ ] T047 [US2] Build packages/shared to verify type checking works correctly
-- [ ] T048 [US2] Create example form using Zod with React Hook Form in apps/web/src/components/examples/ValidationForm.tsx
-- [ ] T049 [US2] Test form validation with shadcn form components integration
+- [X] T038 [P] [US2] Create auth validation schemas (loginSchema, registerSchema) in packages/shared/src/schemas/auth.ts
+- [X] T039 [P] [US2] Create payment validation schemas in packages/shared/src/schemas/payments.ts
+- [X] T040 [P] [US2] Create subscription validation schemas in packages/shared/src/schemas/subscription.ts
+- [X] T041 [US2] Create barrel export file for all schemas in packages/shared/src/schemas/index.ts
+- [X] T042 [US2] Add custom error messages to schemas for user-friendly validation feedback
+- [X] T043 [US2] Configure TypeScript path alias for @membran-app/shared in apps/web/tsconfig.json
+- [X] T044 [US2] Test Zod schema validation with valid data
+- [X] T045 [US2] Test Zod schema validation with invalid data and verify error messages
+- [X] T046 [US2] Test TypeScript type inference from schemas
+- [X] T047 [US2] Build packages/shared to verify type checking works correctly
+- [X] T048 [US2] Create example form using Zod with React Hook Form in apps/web/src/components/examples/ValidationForm.tsx
+- [X] T049 [US2] Test form validation with shadcn form components integration
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently. Validation schemas work with TypeScript inference and provide clear error messages.
 
@@ -135,28 +139,28 @@ This is a monorepo frontend feature:
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T050 [P] [US3] Create E2E test for auth store state updates in apps/web/tests/e2e/state.spec.ts
-- [ ] T051 [P] [US3] Create E2E test for state persistence across page refreshes in apps/web/tests/e2e/state.spec.ts
-- [ ] T052 [P] [US3] Create E2E test for selective re-rendering on state changes in apps/web/tests/e2e/state.spec.ts
-- [ ] T053 [P] [US3] Create E2E test for concurrent state updates from multiple components in apps/web/tests/e2e/state.spec.ts
+- [X] T050 [P] [US3] Create E2E test for auth store state updates in apps/web/tests/e2e/state.spec.ts
+- [X] T051 [P] [US3] Create E2E test for state persistence across page refreshes in apps/web/tests/e2e/state.spec.ts
+- [X] T052 [P] [US3] Create E2E test for selective re-rendering on state changes in apps/web/tests/e2e/state.spec.ts
+- [X] T053 [P] [US3] Create E2E test for concurrent state updates from multiple components in apps/web/tests/e2e/state.spec.ts
 
 ### Implementation for User Story 3
 
-- [ ] T054 [P] [US3] Create auth store with User interface and auth actions in apps/web/src/stores/auth.ts
-- [ ] T055 [P] [US3] Configure persistence middleware for auth store (exclude tokens) in apps/web/src/stores/auth.ts
-- [ ] T056 [P] [US3] Create UI store for theme and sidebar state in apps/web/src/stores/ui.ts
-- [ ] T057 [P] [US3] Configure persistence middleware for UI store in apps/web/src/stores/ui.ts
-- [ ] T058 [P] [US3] Create subscriptions store for subscription data in apps/web/src/stores/subscriptions.ts
-- [ ] T059 [P] [US3] Configure DevTools middleware for all stores (development only) in apps/web/src/stores/
-- [ ] T060 [US3] Test auth store state updates and reactivity
-- [ ] T061 [US3] Test UI store theme switching and state persistence
-- [ ] T062 [US3] Test subscriptions store data fetching and caching
-- [ ] T063 [US3] Verify localStorage persistence for auth store (user data only, no tokens)
-- [ ] T064 [US3] Verify localStorage persistence for UI store (theme, sidebar state)
-- [ ] T065 [US3] Test selective re-rendering (only subscribed components update)
-- [ ] T066 [US3] Test concurrent state updates from multiple components
-- [ ] T067 [US3] Create example components demonstrating store usage in apps/web/src/components/examples/StoreExample.tsx
-- [ ] T068 [US3] Test DevTools integration in development mode
+- [X] T054 [P] [US3] Create auth store with User interface and auth actions in apps/web/src/stores/auth.ts
+- [X] T055 [P] [US3] Configure persistence middleware for auth store (exclude tokens) in apps/web/src/stores/auth.ts
+- [X] T056 [P] [US3] Create UI store for theme and sidebar state in apps/web/src/stores/ui.ts
+- [X] T057 [P] [US3] Configure persistence middleware for UI store in apps/web/src/stores/ui.ts
+- [X] T058 [P] [US3] Create subscriptions store for subscription data in apps/web/src/stores/subscriptions.ts
+- [X] T059 [P] [US3] Configure DevTools middleware for all stores (development only) in apps/web/src/stores/
+- [X] T060 [US3] Test auth store state updates and reactivity
+- [X] T061 [US3] Test UI store theme switching and state persistence
+- [X] T062 [US3] Test subscriptions store data fetching and caching
+- [X] T063 [US3] Verify localStorage persistence for auth store (user data only, no tokens)
+- [X] T064 [US3] Verify localStorage persistence for UI store (theme, sidebar state)
+- [X] T065 [US3] Test selective re-rendering (only subscribed components update)
+- [X] T066 [US3] Test concurrent state updates from multiple components
+- [X] T067 [US3] Create example components demonstrating store usage in apps/web/src/components/examples/StoreExample.tsx
+- [X] T068 [US3] Test DevTools integration in development mode
 
 **Checkpoint**: All user stories should now be independently functional. State management works with persistence and selective re-rendering.
 
@@ -166,20 +170,20 @@ This is a monorepo frontend feature:
 
 **Purpose**: Improvements that affect multiple user stories and final validation
 
-- [ ] T069 [P] Build application and verify build time is under 10 seconds in apps/web
-- [ ] T070 [P] Check bundle size to ensure total increase is under 100KB gzipped
-- [ ] T071 [P] Update CLAUDE.md with shadcn, Zod, and Zustand library information
-- [ ] T072 [P] Update package.json documentation with new library versions
-- [ ] T073 Run complete E2E test suite (components, validation, state) and verify all tests pass
-- [ ] T074 Test tree-shaking by verifying unused components are not included in bundle
-- [ ] T075 Verify accessibility compliance (WCAG 2.1 AA) for all installed components
-- [ ] T076 Test theme switching across all components and pages
-- [ ] T077 Verify TypeScript strict mode compatibility across all libraries
-- [ ] T078 Run quickstart.md validation steps
-- [ ] T079 Create usage documentation for developers in apps/web/README.md
-- [ ] T080 Test application in different browsers (Chrome, Firefox, Safari, Edge)
-- [ ] T081 Verify component props API completeness and TypeScript types
-- [ ] T082 Clean up any temporary test files or debug code
+- [X] T069 [P] Build application and verify build time is under 10 seconds in apps/web
+- [X] T070 [P] Check bundle size to ensure total increase is under 100KB gzipped
+- [X] T071 [P] Update CLAUDE.md with shadcn, Zod, and Zustand library information
+- [X] T072 [P] Update package.json documentation with new library versions
+- [X] T073 Run complete E2E test suite (components, validation, state) and verify all tests pass
+- [X] T074 Test tree-shaking by verifying unused components are not included in bundle
+- [X] T075 Verify accessibility compliance (WCAG 2.1 AA) for all installed components
+- [X] T076 Test theme switching across all components and pages
+- [X] T077 Verify TypeScript strict mode compatibility across all libraries
+- [X] T078 Run quickstart.md validation steps
+- [X] T079 Create usage documentation for developers in apps/web/README.md
+- [X] T080 Test application in different browsers (Chrome, Firefox, Safari, Edge)
+- [X] T081 Verify component props API completeness and TypeScript types
+- [X] T082 Clean up any temporary test files or debug code
 
 ---
 

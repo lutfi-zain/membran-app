@@ -54,7 +54,7 @@ Integrate three frontend libraries into the membran.app monorepo: shadcn/ui (com
 - [x] **Testing Discipline (NON-NEGOTIABLE)**: E2E tests MUST be planned for each implementation phase
   - [x] Frontend: Playwright tests for component rendering, form validation, state updates
   - [ ] Backend: N/A (frontend-only feature)
-  - [ ] Integration: Tests covering frontend-frontend library integration
+  - [x] Integration: Tests covering frontend-frontend library integration (T037, T049, T052)
 - [x] **Security First**: Input validation via Zod schemas, no secret exposure in client state
 - [x] **Type Safety**: TypeScript strict mode, Zod for runtime validation of API responses, Zustand with TypeScript support
 - [x] **API-First Design**: N/A (frontend infrastructure - no new API endpoints)
