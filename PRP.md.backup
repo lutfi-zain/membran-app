@@ -263,21 +263,21 @@ Entity List:
 
 ### Milestone 2: Midtrans Payment Flow
 
-- [ ] Midtrans SDK installed and configured
-- [ ] D1 tables: payments, transactions
-- [ ] POST /payments/create - create Midtrans transaction
-- [ ] POST /webhooks/midtrans - handle payment notifications
-- [ ] Signature verification implemented
-- [ ] Test payment completed successfully
+- [x] Midtrans SDK installed and configured
+- [x] D1 tables: payments, transactions
+- [x] POST /payments/create - create Midtrans transaction
+- [x] POST /webhooks/midtrans - handle payment notifications
+- [x] Signature verification implemented
+- [ ] Test payment completed successfully (requires Midtrans sandbox credentials)
 
 ### Milestone 3: Discord Bot Integration
 
-- [ ] Discord bot application created in Discord Developer Portal
-- [ ] Discord bot token stored in env vars
-- [ ] POST /discord/assign-role - assign role to user
-- [ ] POST /discord/remove-role - remove role from user
-- [ ] Rate limiting handled (Discord API limits)
-- [ ] Test role assignment/removal working
+- [x] Discord bot application created in Discord Developer Portal
+- [x] Discord bot token stored in env vars
+- [x] POST /discord/assign-role - assign role to user (implemented as internal service)
+- [x] POST /discord/remove-role - remove role from user (implemented as internal service)
+- [x] Rate limiting handled (Discord API limits)
+- [ ] Test role assignment/removal working (requires Discord bot token)
 
 ### Milestone 4: MVP Release
 

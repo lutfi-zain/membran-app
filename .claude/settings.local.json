@@ -59,7 +59,14 @@
       "Bash(npx tsc:*)",
       "Bash(powershell:*)",
       "Bash(echo:*)",
-      "Bash(npx shadcn@latest mcp:*)"
+      "Bash(npx shadcn@latest mcp:*)",
+      "Skill(speckit.clarify)",
+      "Skill(speckit.plan)",
+      "Skill(speckit.tasks)",
+      "Bash(then find:*)",
+      "Bash(npx wrangler dev --help:*)",
+      "Bash(start:*)",
+      "Bash(find:*)"
     ]
   }
 }

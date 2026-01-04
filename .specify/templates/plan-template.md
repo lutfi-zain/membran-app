@@ -50,6 +50,23 @@ Each implementation phase MUST include:
 - [ ] Coverage for: happy path, error cases, edge cases
 - [ ] Full test suite passes with no regressions
 
+### Demo & Handoff (NON-NEGOTIABLE)
+
+After completing feature implementation:
+- [ ] **E2E Happy Flow Testing**: Complete user journey run in headfull mode
+  - [ ] Launch Playwright in headfull mode (`npx playwright test --ui` or `--headed`)
+  - [ ] Execute all critical paths: signup/login, core feature interaction, expected outcomes
+  - [ ] Verify system stability throughout the flow
+  - [ ] Capture screenshots or video evidence of successful completion
+- [ ] **Progress Reporting**: Document and communicate completion
+  - [ ] Summarize feature functionality
+  - [ ] Confirm system working as expected
+  - [ ] Note any observed issues or areas needing attention
+- [ ] **Integration Coordination**: External integrations requiring manual setup
+  - [ ] Identify manual actions required from stakeholders
+  - [ ] Coordinate with Lutfi for logins, API keys, or credentials
+  - [ ] Do not bypass integration testing - wait for necessary access
+
 ### Architecture & Scope Review
 
 - [ ] Technology stack compliance (Bun, React, Hono, Cloudflare Workers, D1, Drizzle)

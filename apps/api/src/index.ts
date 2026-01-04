@@ -10,6 +10,7 @@ import { onboardingRouter } from "./routes/onboarding";
 import { webhooksRouter } from "./routes/webhooks";
 import { subscriptionsRouter } from "./routes/subscriptions";
 import { paymentsRouter } from "./routes/payments";
+import { membersRouter } from "./routes/members";
 
 type Bindings = {
   DB: D1Database;
@@ -46,5 +47,6 @@ app.route("/api/subscriptions", subscriptionsRouter);
 app.route("/api/pricing", pricingRouter);
 app.route("/api/payments", paymentsRouter);
 app.route("/api/onboarding", onboardingRouter);
+app.route("/api/members", membersRouter);
 
 export default app;
