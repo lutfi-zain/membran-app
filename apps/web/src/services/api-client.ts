@@ -9,7 +9,7 @@ import type {
   PaymentStatusResponse,
 } from '@membran/shared';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8787';
+const API_URL = import.meta.env.VITE_API_URL || '';
 
 /**
  * Helper to get session cookie for authenticated requests
@@ -45,7 +45,7 @@ export const paymentsApi = {
   async createPayment(
     request: CreatePaymentRequest
   ): Promise<CreatePaymentResponse> {
-    const response = await fetch(`${API_URL}/payments/create`, {
+    const response = await fetch(`${API_URL}/api/payments/create`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify(request),
@@ -58,7 +58,7 @@ export const paymentsApi = {
    * Get payment status
    */
   async getPaymentStatus(transactionId: string): Promise<PaymentStatusResponse> {
-    const response = await fetch(`${API_URL}/payments/${transactionId}`, {
+    const response = await fetch(`${API_URL}/api/payments/${transactionId}`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });
@@ -75,7 +75,7 @@ export const subscriptionsApi = {
    * Get user's subscriptions
    */
   async getSubscriptions() {
-    const response = await fetch(`${API_URL}/subscriptions`, {
+    const response = await fetch(`${API_URL}/api/subscriptions`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });
@@ -87,7 +87,7 @@ export const subscriptionsApi = {
    * Get single subscription
    */
   async getSubscription(id: string) {
-    const response = await fetch(`${API_URL}/subscriptions/${id}`, {
+    const response = await fetch(`${API_URL}/api/subscriptions/${id}`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });
@@ -121,7 +121,7 @@ export const authApi = {
    * Get current user
    */
   async getMe() {
-    const response = await fetch(`${API_URL}/auth/me`, {
+    const response = await fetch(`${API_URL}/api/auth/me`, {
       method: 'GET',
       headers: getAuthHeaders(),
     });
@@ -133,7 +133,7 @@ export const authApi = {
    * Send verification email
    */
   async sendVerificationEmail(email: string) {
-    const response = await fetch(`${API_URL}/auth/send-verification`, {
+    const response = await fetch(`${API_URL}/api/auth/send-verification`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify({ email }),

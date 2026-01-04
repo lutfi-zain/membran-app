@@ -3,9 +3,8 @@
  * Display pricing tiers with selection and payment buttons
  */
 
-import { useQuery } from '@tanstack/react-query';
 import { PaymentButton } from './PaymentButton';
-import { pricingApi } from '../services/api-client';
+import { usePublicPricingTiers } from '../hooks/usePublicPricingTiers';
 
 interface Tier {
   id: string;
@@ -30,10 +29,7 @@ export function TierSelector({
   selectedTierId,
   onTierSelect,
 }: TierSelectorProps) {
-  const { data: tiersData, isLoading, error } = useQuery({
-    queryKey: ['pricing', 'tiers', serverId],
-    queryFn: () => pricingApi.getTiers(serverId),
-  });
+  const { data: pricingData, isLoading, error } = usePublicPricingTiers(serverId);
 
   if (isLoading) {
     return (
@@ -54,9 +50,9 @@ export function TierSelector({
     );
   }
 
-  const tiers = tiersData?.data || [];
+  const tiersList = pricingData?.tiers || [];
 
-  if (tiers.length === 0) {
+  if (tiersList.length === 0) {
     return (
       <div className="text-center py-12">
         <p className="text-gray-500">No pricing tiers available for this server.</p>
@@ -65,7 +61,7 @@ export function TierSelector({
   }
 
   // Sort by display order
-  const sortedTiers = [...tiers].sort((a, b) => a.displayOrder - b.displayOrder);
+  const sortedTiers = [...tiersList].sort((a, b) => a.displayOrder - b.displayOrder);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

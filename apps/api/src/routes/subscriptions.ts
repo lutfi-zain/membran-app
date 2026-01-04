@@ -4,7 +4,7 @@
  */
 
 import { zValidator } from '@hono/zod-validator';
-import { createDb, pricingTiers, subscriptions } from '@membran/db';
+import { createDb, pricingTiers, subscriptions, transactions, discordServers } from '@membran/db';
 import { eq, and, sql, desc } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { getCookie } from 'hono/cookie';
@@ -69,12 +69,35 @@ subscriptionsRouter.get('/', async (c) => {
     .orderBy(desc(subscriptions.createdAt))
     .execute();
 
-  // Enrich with tier information
+  // Get transaction IDs for each subscription
+  const subscriptionIds = userSubscriptions.map((sub: any) => sub.id);
+  const transactionRecords = subscriptionIds.length > 0
+    ? await db
+        .select({
+          id: transactions.id,
+          subscriptionId: transactions.subscriptionId,
+        })
+        .from(transactions)
+        .where(sql`${transactions.subscriptionId} IN ${sql.raw(`('${subscriptionIds.join("','")}')`)}`)
+        .execute()
+    : [];
+
+  const transactionMap = new Map<string, string>();
+  transactionRecords.forEach((t: any) => {
+    transactionMap.set(t.subscriptionId, t.id);
+  });
+
+  // Enrich with tier, server, and transaction information
   const enrichedSubscriptions = await Promise.all(
     userSubscriptions.map(async (sub: any) => {
-      const tier = await db.query.pricingTiers.findFirst({
-        where: (pricingTiers, { eq }) => eq(pricingTiers.id, sub.tierId),
-      });
+      const [tier, server] = await Promise.all([
+        db.query.pricingTiers.findFirst({
+          where: (pricingTiers, { eq }) => eq(pricingTiers.id, sub.tierId),
+        }),
+        db.query.discordServers.findFirst({
+          where: (discordServers, { eq }) => eq(discordServers.id, sub.serverId),
+        }),
+      ]);
 
       return {
         ...sub,
@@ -88,6 +111,14 @@ subscriptionsRouter.get('/', async (c) => {
               duration: tier.duration,
             }
           : null,
+        server: server
+          ? {
+              id: server.id,
+              name: server.name,
+              icon: server.icon,
+            }
+          : null,
+        transactionId: transactionMap.get(sub.id) || undefined,
         isExpiringSoon: sub.expiryDate ? isExpiringSoon(new Date(Number(sub.expiryDate))) : false,
       };
     })
@@ -164,6 +195,11 @@ subscriptionsRouter.get('/:id', async (c) => {
   // Get activity history
   const activityHistory = await getActivityHistory(db, subscriptionId);
 
+  // Get transaction for this subscription
+  const transaction = await db.query.transactions.findFirst({
+    where: (transactions, { eq }) => eq(transactions.subscriptionId, subscriptionId),
+  });
+
   const responseData = {
     id: subscription.id,
     memberId: subscription.memberId,
@@ -191,6 +227,7 @@ subscriptionsRouter.get('/:id', async (c) => {
           icon: subscription.server.icon,
         }
       : null,
+    transactionId: transaction?.id || undefined,
     isExpiringSoon: subscription.expiryDate
       ? isExpiringSoon(subscription.expiryDate)
       : false,

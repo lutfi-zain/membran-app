@@ -79,7 +79,7 @@ export async function createTransaction(
     const response = await fetch(`${apiBase}/transactions`, {
       method: 'POST',
       headers: {
-        'Authorization': `Basic ${Buffer.from(serverKey + ':').toString('base64')}`,
+        'Authorization': `Basic ${btoa(serverKey)}`,
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
@@ -131,7 +131,7 @@ export async function getTransactionStatus(
     const response = await fetch(`${apiBase}/transactions/${orderId}/status`, {
       method: 'GET',
       headers: {
-        'Authorization': `Basic ${Buffer.from(serverKey + ':').toString('base64')}`,
+        'Authorization': `Basic ${btoa(serverKey)}`,
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },

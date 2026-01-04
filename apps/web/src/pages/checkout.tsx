@@ -4,18 +4,19 @@
  */
 
 import { useEffect, useState } from 'react';
-import { useNavigate, useSearch } from '@tanstack/react-router';
+import { useNavigate } from '@tanstack/react-router';
 import { usePaymentStatus } from '../hooks/usePayment';
 
 export function CheckoutPage() {
-  const searchParams = useSearch({ strict: false });
   const navigate = useNavigate();
   const [status, setStatus] = useState<'loading' | 'success' | 'failed' | 'pending'>('loading');
 
-  const transactionId = (searchParams as any).transaction_id as string | null;
-  const orderId = (searchParams as any).order_id as string | null;
-  const statusCode = (searchParams as any).status_code as string | null;
-  const transactionStatus = (searchParams as any).transaction_status as string | null;
+  // Use URLSearchParams for consistent parameter parsing
+  const urlParams = new URLSearchParams(window.location.search);
+  const transactionId = urlParams.get('transaction_id');
+  const orderId = urlParams.get('order_id');
+  const statusCode = urlParams.get('status_code');
+  const transactionStatus = urlParams.get('transaction_status');
 
   const { data: paymentStatus, isLoading } = usePaymentStatus(transactionId);
 
@@ -57,7 +58,8 @@ export function CheckoutPage() {
   }, [paymentStatus]);
 
   const renderContent = () => {
-    if (isLoading || status === 'loading') {
+    // Show loading state only if we're still loading AND we don't have a URL status
+    if ((isLoading || status === 'loading') && !transactionStatus) {
       return (
         <div className="flex flex-col items-center justify-center py-12">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[#5865F2]" />

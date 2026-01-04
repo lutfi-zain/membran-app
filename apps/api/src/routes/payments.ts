@@ -20,6 +20,7 @@ import {
   createTransaction,
   generateOrderId,
   getPaymentExpiry,
+  getTransactionStatus,
 } from '../services/midtrans';
 import { checkActiveSubscription } from '../services/subscriptions';
 
@@ -232,6 +233,91 @@ payments.get('/:transactionId', async (c) => {
       currency: transaction.currency,
       paymentMethod: transaction.paymentMethod,
       paymentDate: transaction.paymentDate?.toISOString(),
+    },
+  });
+});
+
+/**
+ * POST /payments/:transactionId/sync
+ * Sync payment status from Midtrans
+ */
+payments.post('/:transactionId/sync', async (c) => {
+  const transactionId = c.req.param('transactionId');
+  const db = createDb(c.env.DB);
+
+  const transaction = await db.query.transactions.findFirst({
+    where: (transactions, { eq }) => eq(transactions.id, transactionId),
+  });
+
+  if (!transaction) {
+    return c.json(
+      {
+        success: false,
+        error: { code: 'TRANSACTION_NOT_FOUND', message: 'Transaction not found' },
+      },
+      404
+    );
+  }
+
+  // Query Midtrans for current status
+  const midtransStatus = await getTransactionStatus(c.env, transaction.midtransOrderId);
+
+  if (!midtransStatus.success || !midtransStatus.status) {
+    return c.json(
+      {
+        success: false,
+        error: { code: 'MIDTRANS_ERROR', message: midtransStatus.error || 'Failed to fetch status from Midtrans' },
+      },
+      500
+    );
+  }
+
+  // Map Midtrans status to our status
+  let newStatus: 'Pending' | 'Completed' | 'Failed' | 'Refunded' | 'Cancelled' = 'Pending';
+  const status = midtransStatus.status?.toLowerCase();
+
+  if (status === 'settlement' || status === 'capture') {
+    newStatus = 'Completed';
+  } else if (status === 'pending') {
+    newStatus = 'Pending';
+  } else if (status === 'deny' || status === 'expire') {
+    newStatus = 'Failed';
+  } else if (status === 'refund' || status === 'partial_refund') {
+    newStatus = 'Refunded';
+  } else if (status === 'cancel') {
+    newStatus = 'Cancelled';
+  }
+
+  // Update transaction status
+  await db
+    .update(transactions)
+    .set({
+      status: newStatus,
+      midtransTransactionId: midtransStatus.transactionStatus || null,
+      updatedAt: new Date(),
+    })
+    .where(eq(transactions.id, transactionId));
+
+  // Update subscription if completed
+  if (newStatus === 'Completed' && transaction.subscriptionId) {
+    await db
+      .update(subscriptions)
+      .set({
+        status: 'Active',
+        lastPaymentAmount: String(transaction.amount),
+        lastPaymentDate: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(subscriptions.id, transaction.subscriptionId));
+  }
+
+  return c.json({
+    success: true,
+    data: {
+      transactionId: transaction.id,
+      status: newStatus,
+      midtransStatus: midtransStatus.status,
+      message: `Status synced from Midtrans: ${newStatus}`,
     },
   });
 });
