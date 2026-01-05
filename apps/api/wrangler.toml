@@ -17,3 +17,9 @@ pattern = "*/5 * * * *"
 
 [vars]
 # Add env vars here
+
+# Cron trigger for pending subscription cleanup (runs every hour)
+# Cancels pending subscriptions older than 1 hour
+[[triggers.crons]]
+cron = "0 * * * *"  # Every hour
+pattern = "0 * * * *"

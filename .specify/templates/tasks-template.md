@@ -159,6 +159,30 @@ Examples of foundational tasks (adjust based on your project):
 
 ---
 
+## Phase N+1: Demo & Handoff (NON-NEGOTIABLE)
+
+**Purpose**: Final E2E validation and progress reporting before feature completion
+
+> **IMPORTANT**: This phase MUST be completed before considering the feature done.
+
+- [ ] TXXX **E2E Happy Flow Testing**: Run complete user journey in headfull mode
+  - Launch Playwright in headfull mode (`npx playwright test --ui` or `--headed`)
+  - Execute all critical paths: signup/login, core feature interaction, expected outcomes
+  - Verify system works normally and remains stable throughout the flow
+  - Capture screenshots or video evidence of successful completion
+- [ ] TXXX **Progress Reporting**: Document and communicate completion to stakeholders (Lutfi)
+  - Provide a clear summary of the feature's functionality
+  - Confirm the system is working as expected
+  - Note any observed issues or areas needing attention
+- [ ] TXXX **Integration Coordination** (if external integrations required)
+  - Identify what manual actions are required from stakeholders
+  - Request assistance from Lutfi for logins to third-party apps, API keys, or other credentials
+  - Do not bypass or skip integration testing - wait for necessary access
+
+**Checkpoint**: Feature is complete, tested end-to-end, and ready for production
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies

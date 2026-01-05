@@ -28,6 +28,9 @@ import { Dashboard } from "./components/navigation/Dashboard";
 import { NotFound } from "./components/NotFound";
 import { TestPage } from "./pages/test";
 import { DashboardDummyPage } from "./pages/dashboard-dummy";
+import { PricingPage } from "./pages/pricing";
+import { CheckoutPage } from "./pages/checkout";
+import { MemberPortal } from "./pages/member-portal";
 
 const queryClient = new QueryClient();
 
@@ -256,6 +259,37 @@ const dashboardDummyRoute = createRoute({
   component: DashboardDummyPage,
 });
 
+// Pricing Route - Public pricing page
+const pricingRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/pricing",
+  component: () => <PricingPage serverId="hm31pithttsxh5hcaq9xk198m" />,
+});
+
+// Checkout Route - Payment confirmation page
+const checkoutRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/checkout",
+  component: CheckoutPage,
+});
+
+// Member Portal Route - T067 [US3]: Self-service subscription management
+const memberPortalRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/member-portal",
+  beforeLoad: async ({ location }) => {
+    // Check authentication - require sign in
+    const authRes = await fetch("/api/auth/me");
+    if (!authRes.ok) {
+      throw redirect({
+        to: "/login",
+        search: { return: "/member-portal" },
+      });
+    }
+  },
+  component: MemberPortal,
+});
+
 // Create Router
 const routeTree = rootRoute.addChildren([
   indexRoute,
@@ -268,10 +302,13 @@ const routeTree = rootRoute.addChildren([
   forgotPasswordRoute,
   resetPasswordRoute,
   settingsRoute,
-testRoute,
+  testRoute,
   dashboardDummyRoute,
   settingsBotRoute,
   settingsPricingRoute,
+  pricingRoute,
+  checkoutRoute,
+  memberPortalRoute,
 ]);
 
 const router = createRouter({ routeTree });

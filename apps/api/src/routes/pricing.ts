@@ -5,6 +5,7 @@
  * Server owners can create, edit, delete, and reorder pricing tiers.
  *
  * Endpoints:
+ * - GET /api/pricing/public/:serverId - Public endpoint to view tiers for a server (no auth required)
  * - GET /api/pricing/tiers - List all tiers for authenticated user's server
  * - POST /api/pricing/tiers - Create a new pricing tier
  * - GET /api/pricing/tiers/:tierId - Get a specific tier
@@ -68,6 +69,80 @@ router.use("*", rateLimitMiddleware);
 
 // Helper function to generate IDs
 const generateId = (length: number) => generateRandomString(length, alphabet("0-9", "a-z"));
+
+// ============================================================================
+// GET /api/pricing/public/:serverId - Public Pricing Tiers Endpoint
+// ============================================================================
+
+/**
+ * Public endpoint to view pricing tiers for a specific Discord server.
+ * Does NOT require authentication - used for the public pricing page.
+ *
+ * Returns server info and all active tiers with features.
+ */
+router.get("/public/:serverId", async (c) => {
+  const logger = createLogger(c);
+  const serverId = c.req.param("serverId");
+
+  if (!serverId) {
+    return c.json({ error: "BAD_REQUEST", message: "serverId is required" }, 400);
+  }
+
+  const db = createDb(c.env.DB);
+
+  // Get server by ID
+  const server = await db.query.discordServers.findFirst({
+    where: (discordServers, { eq }) => eq(discordServers.id, serverId),
+  });
+
+  if (!server) {
+    return c.json({ error: "NOT_FOUND", message: "Server not found" }, 404);
+  }
+
+  try {
+    // Get all active tiers for this server
+    const tiers = await getPricingTiers(db, serverId, false);
+
+    // Find featured tier
+    const featuredTier = tiers.find((t) => t.isFeatured) || null;
+
+    const response = {
+      server: {
+        id: server.id,
+        discordId: server.discordId,
+        name: server.name,
+        icon: server.icon,
+        memberCount: server.memberCount ?? 0,
+      },
+      featuredTier,
+      tiers,
+      currencySymbol: "$",
+    };
+
+    logger.info({
+      event: "public_pricing_viewed",
+      serverId,
+      tierCount: tiers.length,
+      hasFeatured: !!featuredTier,
+    });
+
+    return c.json(response);
+  } catch (error) {
+    logger.error({
+      event: "public_pricing_error",
+      serverId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+
+    return c.json(
+      {
+        error: "INTERNAL_ERROR",
+        message: "Failed to fetch pricing tiers",
+      },
+      500,
+    );
+  }
+});
 
 // ============================================================================
 // GET /api/pricing/tiers - List Pricing Tiers

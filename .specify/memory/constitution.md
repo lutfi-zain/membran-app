@@ -12,8 +12,8 @@ Added sections:
 Removed sections: None
 
 Templates requiring updates:
-- .specify/templates/plan-template.md - needs addition of demo phase/task (pending)
-- .specify/templates/tasks-template.md - needs addition of final demo task (pending)
+- .specify/templates/plan-template.md - ✅ COMPLETED (added Demo & Handoff section)
+- .specify/templates/tasks-template.md - ✅ COMPLETED (added Phase N+1: Demo & Handoff)
 - .specify/templates/spec-template.md - no changes needed
 - .specify/templates/agent-file-template.md - no changes needed
 - README.md - no changes needed

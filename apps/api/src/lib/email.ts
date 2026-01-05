@@ -4,8 +4,13 @@ export const sendEmail = async (to: string, subject: string, body: string) => {
   // In a real implementation, this would use fetch to the Resend API
 };
 
-export const sendVerificationEmail = async (to: string, token: string) => {
-  const verificationUrl = `https://membran.app/api/auth/verify?token=${token}`;
+export const sendVerificationEmail = async (
+  env: { APP_URL: string },
+  to: string,
+  token: string
+) => {
+  const appUrl = env.APP_URL || 'http://localhost:5173';
+  const verificationUrl = `${appUrl}/api/auth/verify?token=${token}`;
   await sendEmail(
     to,
     "Verify your Membran account",
@@ -13,8 +18,13 @@ export const sendVerificationEmail = async (to: string, token: string) => {
   );
 };
 
-export const sendPasswordResetEmail = async (to: string, token: string) => {
-  const resetUrl = `https://membran.app/reset-password?token=${token}`;
+export const sendPasswordResetEmail = async (
+  env: { APP_URL: string },
+  to: string,
+  token: string
+) => {
+  const appUrl = env.APP_URL || 'http://localhost:5173';
+  const resetUrl = `${appUrl}/reset-password?token=${token}`;
   await sendEmail(
     to,
     "Reset your Membran password",

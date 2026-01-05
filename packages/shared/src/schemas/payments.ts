@@ -1,55 +1,56 @@
 import { z } from 'zod';
 
-// T039: Payment validation schemas
-
 /**
- * Credit card validation schema
+ * Payment creation request schema
+ * Used when member initiates checkout for a subscription tier
  */
-export const creditCardSchema = z.object({
-  cardNumber: z
-    .string()
-    .min(1, { message: 'Card number is required' })
-    .regex(/^\d{13,19}$/, { message: 'Invalid card number' }),
-  cardholderName: z
-    .string()
-    .min(1, { message: 'Cardholder name is required' })
-    .min(2, { message: 'Cardholder name is too short' }),
-  expirationDate: z
-    .string()
-    .min(1, { message: 'Expiration date is required' })
-    .regex(/^(0[1-9]|1[0-2])\/\d{2}$/, { message: 'Invalid expiration date (MM/YY)' }),
-  cvv: z
-    .string()
-    .min(1, { message: 'CVV is required' })
-    .regex(/^\d{3,4}$/, { message: 'Invalid CVV' }),
+export const createPaymentRequestSchema = z.object({
+  tierId: z.string().min(1, { message: 'Tier ID is required' }),
+  serverId: z.string().min(1, { message: 'Server ID is required' }),
 });
 
-export type CreditCardInput = z.infer<typeof creditCardSchema>;
+export type CreatePaymentRequest = z.infer<typeof createPaymentRequestSchema>;
 
 /**
- * Payment method schema
+ * Payment creation response schema
+ * Returns redirect URL to Midtrans payment page
  */
-export const paymentMethodSchema = z.object({
-  type: z.enum(['credit_card', 'debit_card', 'paypal', 'other'], {
-    errorMap: () => ({ message: 'Invalid payment method type' }),
+export const createPaymentResponseSchema = z.object({
+  success: z.boolean(),
+  data: z.object({
+    transactionId: z.string(),
+    redirectUrl: z.string().url(),
+    expiry: z.string(), // ISO 8601 datetime
   }),
-  provider: z.string().min(1, { message: 'Payment provider is required' }),
-  isDefault: z.boolean().optional(),
 });
 
-export type PaymentMethodInput = z.infer<typeof paymentMethodSchema>;
+export type CreatePaymentResponse = z.infer<typeof createPaymentResponseSchema>;
 
 /**
- * Transaction schema
+ * Payment status query response
  */
-export const transactionSchema = z.object({
-  amount: z
-    .number()
-    .positive({ message: 'Amount must be positive' })
-    .min(0.01, { message: 'Minimum transaction amount is $0.01' }),
-  currency: z.string().length(3, { message: 'Invalid currency code (e.g., USD)' }),
-  description: z.string().optional(),
-  metadata: z.record(z.string()).optional(),
+export const paymentStatusResponseSchema = z.object({
+  success: z.boolean(),
+  data: z.object({
+    transactionId: z.string(),
+    status: z.enum(['Pending', 'Success', 'Failed', 'Refunded']),
+    amount: z.number(),
+    currency: z.string(),
+    paymentMethod: z.string().optional(),
+    paymentDate: z.string().optional(), // ISO 8601 datetime
+  }),
 });
 
-export type TransactionInput = z.infer<typeof transactionSchema>;
+export type PaymentStatusResponse = z.infer<typeof paymentStatusResponseSchema>;
+
+/**
+ * Midtrans transaction status enum
+ */
+export const midtransStatusEnum = z.enum([
+  'Pending',
+  'Success',
+  'Failed',
+  'Refunded',
+]);
+
+export type MidtransStatus = z.infer<typeof midtransStatusEnum>;

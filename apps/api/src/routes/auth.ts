@@ -33,6 +33,7 @@ const router = new Hono<{
     DISCORD_CLIENT_ID: string;
     DISCORD_CLIENT_SECRET: string;
     DISCORD_REDIRECT_URI: string;
+    APP_URL: string;
   };
 }>();
 
@@ -81,7 +82,7 @@ router.post("/signup", zValidator("json", SignupSchema), async (c) => {
     expiresAt: verificationExpiresAt,
   });
 
-  await sendVerificationEmail(email, verificationToken);
+  await sendVerificationEmail(c.env, email, verificationToken);
 
   const sessionId = generateId(40);
   const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7);
@@ -220,7 +221,7 @@ router.post(
         expiresAt,
       });
 
-      await sendPasswordResetEmail(email, tokenId);
+      await sendPasswordResetEmail(c.env, email, tokenId);
     }
 
     return c.json({
@@ -474,7 +475,8 @@ router.get("/discord/callback", async (c) => {
     });
 
     // Redirect to frontend onboarding page
-    return c.redirect("http://localhost:5173/onboarding");
+    const appUrl = c.env.APP_URL || "http://localhost:5173";
+    return c.redirect(`${appUrl}/onboarding`);
   } catch (e) {
     console.error("OAuth error:", e);
     return c.json(
