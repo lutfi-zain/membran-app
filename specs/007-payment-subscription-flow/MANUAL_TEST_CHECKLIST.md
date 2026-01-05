@@ -10,17 +10,17 @@
 
 ### Environment Verification
 
-- [ ] API server running on http://localhost:8787
-- [ ] Web server running on http://localhost:5173
-- [ ] Database initialized (D1 local)
-- [ ] Midtrans sandbox credentials configured
-- [ ] Discord bot token configured
+- [x] API server running on http://localhost:8787
+- [x] Web server running on http://localhost:5173
+- [x] Database initialized (D1 local)
+- [x] Midtrans sandbox credentials configured
+- [x] Discord bot token configured
 
 ### Test Accounts Needed
 
-- [ ] Discord account for testing OAuth
-- [ ] Midtrans sandbox test card: `4811 1111 1111 1114` (CVV: `123`)
-- [ ] Test Discord server with bot invited
+- [x] Discord account for testing OAuth
+- [x] Midtrans sandbox test card: `4811 1111 1111 1114` (CVV: `123`)
+- [x] Test Discord server with bot invited
 
 ### Quick Environment Check
 
@@ -50,14 +50,14 @@ bunx wrangler d1 execute membran-db --local --command "SELECT name FROM sqlite_m
 2. Observe the page
 
 **Expected Results**:
-- [ ] Page loads without errors
-- [ ] Title "Choose Your Subscription Plan" is visible
-- [ ] Subheading about unlocking premium features is visible
-- [ ] FAQ section is visible at the bottom
+- [x] Page loads without errors
+- [x] Title "Choose Your Subscription Plan" is visible
+- [x] Subheading about unlocking premium features is visible
+- [x] FAQ section is visible at the bottom
 
 **Actual Results**: _____________________
 
-**Status**: ☐ Pass ☐ Fail
+**Status**: ✅Pass ☐ Fail
 
 ---
 
@@ -68,13 +68,13 @@ bunx wrangler d1 execute membran-db --local --command "SELECT name FROM sqlite_m
 2. Check for tier cards
 
 **Expected Results**:
-- [ ] Tier cards are displayed (if pricing tiers configured)
-- [ ] Or empty state shown (no tiers configured yet)
-- [ ] "Subscribe" or "Purchase" buttons visible
+- [x] Tier cards are displayed (if pricing tiers configured)
+- [x] Or empty state shown (no tiers configured yet)
+- [x] "Subscribe" or "Purchase" buttons visible
 
 **Actual Results**: _____________________
 
-**Status**: ☐ Pass ☐ Fail
+**Status**: ✅Pass ☐ Fail
 
 ---
 
@@ -85,13 +85,13 @@ bunx wrangler d1 execute membran-db --local --command "SELECT name FROM sqlite_m
 2. Check for authentication prompts
 
 **Expected Results**:
-- [ ] Warning message visible for unauthenticated users
-- [ ] "Sign in with Discord" link visible
-- [ ] Email verification warning visible if applicable
+- [x] Warning message visible for unauthenticated users
+- [x] "Sign in with Discord" link visible
+- [x] Email verification warning visible if applicable
 
 **Actual Results**: _____________________
 
-**Status**: ☐ Pass ☐ Fail
+**Status**: ✅ Pass ☐ Fail
 
 ---
 
@@ -105,13 +105,13 @@ bunx wrangler d1 execute membran-db --local --command "SELECT name FROM sqlite_m
 3. Observe redirect
 
 **Expected Results**:
-- [ ] Redirected to Discord OAuth authorization page
-- [ ] URL contains `discord.com/oauth2/authorize`
-- [ ] Bot name and permissions are shown
+- [x] Redirected to Discord OAuth authorization page
+- [x] URL contains `discord.com/oauth2/authorize`
+- [x] Bot name and permissions are shown
 
 **Actual Results**: _____________________
 
-**Status**: ☐ Pass ☐ Fail
+**Status**: ✅ Pass ☐ Fail
 
 ---
 
@@ -122,13 +122,13 @@ bunx wrangler d1 execute membran-db --local --command "SELECT name FROM sqlite_m
 2. Wait for redirect back to app
 
 **Expected Results**:
-- [ ] Redirected back to http://localhost:5173
-- [ ] Session created (check browser cookies for `auth_session`)
-- [ ] User is now authenticated
+- [x] Redirected back to http://localhost:5173
+- [x] Session created (check browser cookies for `auth_session`)
+- [x] User is now authenticated
 
 **Actual Results**: _____________________
 
-**Status**: ☐ Pass ☐ Fail
+**Status**: ✅ Pass ☐ Fail
 
 ---
 
@@ -707,4 +707,3 @@ List any issues discovered during testing:
 **Date**: _____________________
 **Browser**: _____________________
 **Test Environment**: Local (localhost)
-
